@@ -363,7 +363,7 @@ class GameManager {
                 <h3 class="project-title">${item.title}</h3>
                 <p class="project-description">${item.description}</p>
                 <div class="project-status" data-status="${item.status}">${item.status}</div>
-                <div class="version-indicator">${item.versions.length} version${item.versions.length !== 1 ? 's' : ''}</div>
+                <div class="version-indicator">${item.versions ? item.versions.length : 1} version${(item.versions ? item.versions.length : 1) !== 1 ? 's' : ''}</div>
             </div>
             <div class="project-versions">
                 ${versionsHtml}
