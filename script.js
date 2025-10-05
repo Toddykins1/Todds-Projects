@@ -343,11 +343,19 @@ class GameManager {
         const projectGroup = document.createElement('div');
         projectGroup.className = 'project-group';
         
-        const versionsHtml = item.versions.map(version => 
-            `<div class="version-card" data-path="${version.path}" data-sound="hover">
-                <span class="version-name">${version.name}</span>
-            </div>`
-        ).join('');
+        // Handle both single path and versions array
+        let versionsHtml = '';
+        if (item.versions && Array.isArray(item.versions)) {
+            versionsHtml = item.versions.map(version => 
+                `<div class="version-card" data-path="${version.path}" data-sound="hover">
+                    <span class="version-name">${version.name}</span>
+                </div>`
+            ).join('');
+        } else if (item.path) {
+            versionsHtml = `<div class="version-card" data-path="${item.path}" data-sound="hover">
+                <span class="version-name">Play</span>
+            </div>`;
+        }
         
         projectGroup.innerHTML = `
             <div class="project-main-card" data-sound="hover">
