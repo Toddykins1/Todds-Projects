@@ -132,10 +132,7 @@ class GameManager {
                     icon: "🧠",
                     status: "Complete",
                     category: "games",
-                    versions: [
-                        { name: "Main Version", path: "Games/Verbal%20Memory%20Grid/index.html" },
-                        { name: "Audio Enhanced", path: "Games/Verbal%20Memory%20Grid/Audio%20Version/index.html" }
-                    ]
+                    path: "Games/Verbal%20Memory%20Grid/index.html"
                 },
                 {
                     id: "orb-survival",

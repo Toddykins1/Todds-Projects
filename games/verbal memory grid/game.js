@@ -1,3 +1,6 @@
+// Audio-Enhanced Verbal Memory Game
+// Includes satisfying procedural sounds that match the game's design vibe
+
 // --- Grid and Responsiveness ---
 function getGridConfig() {
   if (window.innerWidth <= 600 || window.innerHeight <= 600) {
@@ -5,8 +8,6 @@ function getGridConfig() {
   }
   return { cols: 5, rows: 3 };
 }
-
-
 
 function isVerticalMode() {
   const cfg = getGridConfig();
@@ -50,19 +51,26 @@ function updateTimerDisplay() {
   const sec = timerSeconds % 60;
   timer.querySelector('span').textContent =
     min + ':' + (sec < 10 ? '0' : '') + sec;
+  
+  // Play subtle timer tick sound
+  if (audioSystem && timerSeconds <= 10 && timerSeconds > 0) {
+    audioSystem.playTimerTick();
+  }
 }
 
 function updateRoundDisplay() {
   document.getElementById('round').querySelector('span:last-child').textContent = round;
   triggerGlow('round');
+  
+  // Play round complete sound
+  if (audioSystem && round > 1) {
+    audioSystem.playRoundComplete();
+  }
 }
 
 // ----- SCORING AND STRIKES -----
 let score = 0;
 let strikes = 0;
-
-
-
 
 function triggerGlow(id) {
   // Special case for strikes: apply to all X's
@@ -82,7 +90,6 @@ function triggerGlow(id) {
     el.classList.add('glow');
   }
 }
-
 
 function updateScoreDisplay() {
   document.getElementById('score').querySelector('span:last-child').textContent = score;
@@ -111,15 +118,25 @@ function incrementStrike() {
   strikes += 1;
   updateStrikesDisplay();
   triggerGlow('strikes');
+  
+  // Play strike sound
+  if (audioSystem) {
+    audioSystem.playStrike();
+  }
+  
   if (strikes >= 3) {
     showGameOverOverlay();
   }
 }
 
-
 function incrementScore() {
   score += 1;
   updateScoreDisplay();
+  
+  // Play score increase sound
+  if (audioSystem) {
+    audioSystem.playScoreIncrease();
+  }
 }
 
 function startGame() {
@@ -128,6 +145,12 @@ function startGame() {
   setTimeout(() => {
     overlay.style.display = 'none';
   }, 200);
+  
+  // Initialize audio system on first user interaction
+  if (!audioSystem) {
+    audioSystem = initAudioSystem();
+  }
+  
   timerSeconds = 60;
   updateTimerDisplay();
   if (timerInterval) clearInterval(timerInterval);
@@ -155,13 +178,12 @@ function showStartOverlay() {
   overlay.focus();
 
   let msg;
-if ('ontouchstart' in window) {
-  msg = 'Long-tap NEW words.\nShort-tap SEEN words.\nTap to start.';
-} else {
-  msg = 'Left-click NEW words.\nRight-click SEEN words.\nClick to start.';
-}
-instr.textContent = msg;
-
+  if ('ontouchstart' in window) {
+    msg = 'Long-tap NEW words.\nShort-tap SEEN words.\nTap to start.';
+  } else {
+    msg = 'Left-click NEW words.\nRight-click SEEN words.\nClick to start.';
+  }
+  instr.textContent = msg;
 }
 
 function showGameOverOverlay() {
@@ -169,6 +191,11 @@ function showGameOverOverlay() {
   if (timerInterval) clearInterval(timerInterval);
   stopWordSpawning();
   clearAllWordTiles();
+
+  // Play game over sound
+  if (audioSystem) {
+    audioSystem.playGameOver();
+  }
 
   const overlay = document.getElementById('gameOverOverlay');
   const instr = document.getElementById('gameOverInstructions');
@@ -217,9 +244,6 @@ function showGameOverOverlay() {
   overlay.addEventListener('keydown', keyHandler);
   overlay.focus();
 }
-
-
-
 
 function startOverlayHandler(e) {
   e.preventDefault();
@@ -274,6 +298,7 @@ window.addEventListener('resize', () => {
     showStartOverlay();
   }
 });
+
 window.addEventListener('DOMContentLoaded', () => {
   updateGrid();
   resetForStartOverlay();
@@ -371,7 +396,6 @@ function createRadialSweepOverlay(durationSec) {
   wordDiv.style.wordBreak = 'break-word';
   wordDiv.style.whiteSpace = 'nowrap';
 
-
   overlay.appendChild(wordDiv);
 
   // Animate the radial sweep (circle only, no dim)
@@ -421,26 +445,26 @@ function createRadialSweepOverlay(durationSec) {
     if (requestId) cancelAnimationFrame(requestId);
   };
 
-function fitText(div) {
-  let parent = div.parentNode;
-  if (!parent) return;
-  let size = 36; // px, or start larger if your tiles are big
-  div.style.fontSize = size + 'px';
-  div.style.whiteSpace = 'nowrap'; // ensure one line!
-  let fits = () => div.scrollWidth <= parent.offsetWidth * 0.80;
-  while (!fits() && size > 10) {
-    size -= 1;
+  function fitText(div) {
+    let parent = div.parentNode;
+    if (!parent) return;
+    let size = 36; // px, or start larger if your tiles are big
     div.style.fontSize = size + 'px';
+    div.style.whiteSpace = 'nowrap'; // ensure one line!
+    let fits = () => div.scrollWidth <= parent.offsetWidth * 0.80;
+    while (!fits() && size > 10) {
+      size -= 1;
+      div.style.fontSize = size + 'px';
+    }
   }
-}
 
   overlay.setWord = (w, isNew) => {
-  wordDiv.textContent = (w || '').toUpperCase();
-  overlay._word = w;
-  overlay._isNew = isNew;
-  // Wait for DOM update, then fit
-  setTimeout(() => fitText(wordDiv), 0);
-};
+    wordDiv.textContent = (w || '').toUpperCase();
+    overlay._word = w;
+    overlay._isNew = isNew;
+    // Wait for DOM update, then fit
+    setTimeout(() => fitText(wordDiv), 0);
+  };
 
   return overlay;
 }
@@ -448,10 +472,12 @@ function fitText(div) {
 function getAllTiles() {
   return Array.from(document.querySelectorAll('.tile'));
 }
+
 function getAvailableTileIndices() {
   return getAllTiles().map((tile, i) => tile.querySelector('.tile-word-overlay') ? null : i)
                       .filter(i => i !== null);
 }
+
 function clearAllWordTiles() {
   getAllTiles().forEach(tile => {
     const overlay = tile.querySelector('.tile-word-overlay');
@@ -487,6 +513,11 @@ function spawnWordInRandomTile() {
   tile.appendChild(overlay);
   overlay._startSweep();
 
+  // Play word spawn sound
+  if (audioSystem) {
+    audioSystem.playWordSpawn();
+  }
+
   const t = setTimeout(() => {
     overlay._stopSweep();
     if (overlay.parentNode === tile) {
@@ -511,7 +542,6 @@ function scheduleNextWordSpawn() {
   }, randInterval));
 }
 
-
 let wordSpawningActive = false;
 function startWordSpawning() {
   wordSpawningActive = true;
@@ -519,6 +549,7 @@ function startWordSpawning() {
   wordSpawnsCount = 0;
   scheduleNextWordSpawn();
 }
+
 function stopWordSpawning() {
   wordSpawningActive = false;
   spawnTimers.forEach(x => clearTimeout(x));
@@ -551,10 +582,16 @@ function showTileFeedback(tile, message, isGood) {
   });
 }
 
-
 function attachWordInputHandlers(overlay, word) {
   let touchTimeout = null;
   let longTapTriggered = false;
+
+  // Add hover sound effect
+  overlay.addEventListener('mouseenter', () => {
+    if (audioSystem) {
+      audioSystem.playHover();
+    }
+  });
 
   overlay.addEventListener('mousedown', (e) => {
     e.preventDefault();
@@ -588,7 +625,6 @@ function attachWordInputHandlers(overlay, word) {
   });
 }
 
-
 function handleWordClickAction(type, overlay, word) {
   if (overlay._handled) return;
   overlay._handled = true;
@@ -603,20 +639,36 @@ function handleWordClickAction(type, overlay, word) {
       incrementScore();
       feedbackMsg = 'Correct';
       isGood = true;
+      // Play correct sound
+      if (audioSystem) {
+        audioSystem.playCorrect();
+      }
     } else {
       incrementStrike();
       feedbackMsg = 'Was seen';
       isGood = false;
+      // Play incorrect sound
+      if (audioSystem) {
+        audioSystem.playIncorrect();
+      }
     }
   } else if (type === 'right') {
     if (isSeen) {
       incrementScore();
       feedbackMsg = 'Correct';
       isGood = true;
+      // Play correct sound
+      if (audioSystem) {
+        audioSystem.playCorrect();
+      }
     } else {
       incrementStrike();
       feedbackMsg = 'Was new';
       isGood = false;
+      // Play incorrect sound
+      if (audioSystem) {
+        audioSystem.playIncorrect();
+      }
     }
   } else {
     // In case of unexpected input, fallback
@@ -627,7 +679,5 @@ function handleWordClickAction(type, overlay, word) {
   showTileFeedback(overlay.parentNode, feedbackMsg, isGood);
   removeOverlayFromTile(overlay);
 }
-
-
 
 window.oncontextmenu = () => false;
