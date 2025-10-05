@@ -237,7 +237,7 @@ class GameManager {
                     title: "Notes",
                     description: "Minimalist note taking with auto-save and beautiful design",
                     icon: "📝",
-                    status: "Complete",
+                    status: "In Progress",
                     category: "tools",
                     versions: [
                         { name: "Minimalist Dark", path: "tools/notes/notes.html" }
