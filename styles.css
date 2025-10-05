@@ -212,6 +212,7 @@ body::after {
     border: 1px solid rgba(99, 102, 241, 0.2);
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .theme-options {
@@ -292,7 +293,6 @@ body::after {
 }
 
 .theme-btn:hover {
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
@@ -983,11 +983,7 @@ body::after {
     }
 }
 
-/* Loading states */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
+/* Loading states - removed to prevent page load dimming */
 
 /* Focus states for accessibility */
 .category-header:focus,

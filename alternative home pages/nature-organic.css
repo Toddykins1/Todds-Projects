@@ -325,7 +325,6 @@ body::before {
 }
 
 .theme-btn:hover {
-    transform: translateY(-2px);
     box-shadow: var(--shadow-hover);
 }
 

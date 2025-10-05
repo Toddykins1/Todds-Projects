@@ -571,15 +571,8 @@ class AnimationManager {
     }
     
     setupPageLoadAnimation() {
-        // Add loading state
-        document.body.classList.add('loading');
-        
-        // Remove loading state after page is fully loaded
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.body.classList.remove('loading');
-            }, 500);
-        });
+        // Page load animation removed to prevent dimming effect
+        // The page now loads directly without any loading state
     }
     
     setupBackgroundAnimation() {
