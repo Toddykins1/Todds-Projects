@@ -222,7 +222,7 @@ class GameManager {
                     title: "Pantry Tracker",
                     description: "Track food items and expiration dates",
                     icon: "🍎",
-                    status: "Complete",
+                    status: "In Progress",
                     category: "tools",
                     versions: [
                         { name: "Original Design", path: "tools/pantry tracker/pantry-tracker-a1.html" },
@@ -237,7 +237,7 @@ class GameManager {
                     title: "Notes",
                     description: "Minimalist note taking with auto-save and beautiful design",
                     icon: "📝",
-                    status: "In Progress",
+                    status: "Early Concept",
                     category: "tools",
                     versions: [
                         { name: "Minimalist Dark", path: "tools/notes/notes.html" }
