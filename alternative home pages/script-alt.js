@@ -627,12 +627,12 @@ class ThemeManager {
         // Arrow navigation
         if (leftArrow && rightArrow && themeOptions) {
             leftArrow.addEventListener('click', () => {
-                themeOptions.scrollBy({ left: -136, behavior: 'smooth' });
+                themeOptions.scrollBy({ left: -48, behavior: 'smooth' });
                 playSound('click');
             });
             
             rightArrow.addEventListener('click', () => {
-                themeOptions.scrollBy({ left: 136, behavior: 'smooth' });
+                themeOptions.scrollBy({ left: 48, behavior: 'smooth' });
                 playSound('click');
             });
             
