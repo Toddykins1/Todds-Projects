@@ -222,7 +222,7 @@ body::after {
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    max-width: 136px;
+    width: 136px;
 }
 
 .theme-options::-webkit-scrollbar {
