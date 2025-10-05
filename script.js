@@ -231,6 +231,17 @@ class GameManager {
                         { name: "Minimal Glass", path: "tools/pantry tracker/pantry-tracker-minimal-glass.html" },
                         { name: "Vintage Kitchen", path: "tools/pantry tracker/pantry-tracker-vintage-kitchen.html" }
                     ]
+                },
+                {
+                    id: "notes",
+                    title: "Notes",
+                    description: "Minimalist note taking with auto-save and beautiful design",
+                    icon: "📝",
+                    status: "Complete",
+                    category: "tools",
+                    versions: [
+                        { name: "Minimalist Dark", path: "tools/notes/notes.html" }
+                    ]
                 }
             ],
             feedback: [
