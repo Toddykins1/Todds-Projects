@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pi Memory Test - Retro Vaporwave</title>
+  <style>
+    :root {
+      --primary-color: #0a0a0a;
+      --secondary-color: #ff00ff;
+      --text-color: #ffffff;
+      --block-bg: #1a0a1a;
+      --accent-pink: #ff0080;
+      --accent-cyan: #00ffff;
+      --accent-purple: #8000ff;
+      --accent-yellow: #ffff00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 25%, #0a0a1a 50%, #1a0a0a 75%, #0a0a0a 100%);
+      color: var(--text-color);
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Vaporwave background effects */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(128, 0, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -2;
+      animation: vaporwaveFloat 20s ease-in-out infinite;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(45deg, transparent 30%, rgba(255, 0, 255, 0.03) 50%, transparent 70%),
+        linear-gradient(-45deg, transparent 30%, rgba(0, 255, 255, 0.03) 50%, transparent 70%),
+        linear-gradient(90deg, transparent 30%, rgba(128, 0, 255, 0.02) 50%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+      animation: vaporwaveShift 15s ease-in-out infinite;
+    }
+    
+    @keyframes vaporwaveFloat {
+      0%, 100% { 
+        transform: translate(0, 0) rotate(0deg) scale(1); 
+        opacity: 1;
+      }
+      25% { 
+        transform: translate(30px, -30px) rotate(90deg) scale(1.1); 
+        opacity: 0.8;
+      }
+      50% { 
+        transform: translate(-20px, 20px) rotate(180deg) scale(0.9); 
+        opacity: 0.9;
+      }
+      75% { 
+        transform: translate(20px, 30px) rotate(270deg) scale(1.05); 
+        opacity: 0.85;
+      }
+    }
+    
+    @keyframes vaporwaveShift {
+      0%, 100% { 
+        transform: translateX(0) translateY(0); 
+      }
+      33% { 
+        transform: translateX(25px) translateY(-25px); 
+      }
+      66% { 
+        transform: translateX(-15px) translateY(15px); 
+      }
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--block-bg) 0%, #2a0a2a 100%);
+      border-radius: 0;
+      box-shadow: 
+        0 0 50px rgba(255, 0, 255, 0.3),
+        0 0 100px rgba(0, 255, 255, 0.2),
+        inset 0 0 20px rgba(128, 0, 255, 0.1);
+      border: 3px solid;
+      border-image: linear-gradient(45deg, var(--accent-pink), var(--accent-cyan), var(--accent-purple), var(--accent-yellow)) 1;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(45deg, transparent 0%, rgba(255, 0, 255, 0.05) 25%, transparent 50%, rgba(0, 255, 255, 0.05) 75%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+      animation: containerGlow 3s ease-in-out infinite;
+    }
+    
+    @keyframes containerGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    
+    h1 { 
+      text-align: center; 
+      margin-bottom: 1rem; 
+      font-size: 2.5rem; 
+      background: linear-gradient(45deg, var(--accent-pink), var(--accent-cyan), var(--accent-purple), var(--accent-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 
+        0 0 20px rgba(255, 0, 255, 0.5),
+        0 0 40px rgba(0, 255, 255, 0.3),
+        0 0 60px rgba(128, 0, 255, 0.2);
+      position: relative;
+      z-index: 1;
+      animation: titlePulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes titlePulse {
+      0%, 100% { 
+        filter: brightness(1) drop-shadow(0 0 20px rgba(255, 0, 255, 0.3)); 
+      }
+      50% { 
+        filter: brightness(1.2) drop-shadow(0 0 30px rgba(0, 255, 255, 0.4)); 
+      }
+    }
+    
+    #pi-container { 
+      display: flex; 
+      align-items: center; 
+      margin-bottom: 1rem; 
+      position: relative;
+      z-index: 1;
+    }
+    
+    .pi-prefix { 
+      font-size: 2rem; 
+      margin-right: 0.5rem; 
+      color: var(--accent-yellow);
+      text-shadow: 
+        0 0 10px rgba(255, 255, 0, 0.8),
+        0 0 20px rgba(255, 255, 0, 0.6),
+        0 0 30px rgba(255, 255, 0, 0.4);
+      animation: prefixGlow 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes prefixGlow {
+      0%, 100% { 
+        filter: brightness(1); 
+      }
+      50% { 
+        filter: brightness(1.3); 
+      }
+    }
+    
+    #pi-input {
+      font-size: 2rem;
+      flex: 1;
+      padding: 0.5rem;
+      border: 2px solid var(--accent-pink);
+      border-radius: 0;
+      background: linear-gradient(135deg, rgba(26, 10, 26, 0.9), rgba(42, 10, 42, 0.9));
+      color: var(--text-color);
+      outline: none;
+      font-family: 'Courier New', monospace;
+      box-shadow: 
+        inset 0 0 10px rgba(255, 0, 255, 0.2),
+        0 0 20px rgba(255, 0, 255, 0.3);
+      transition: all 0.3s ease;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+    
+    #pi-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 
+        inset 0 0 15px rgba(0, 255, 255, 0.3),
+        0 0 30px rgba(0, 255, 255, 0.5);
+    }
+    
+    .block {
+      display: inline-block;
+      padding: 0.75rem 1rem;
+      margin: 0.25rem;
+      background: linear-gradient(135deg, #2a0a2a, #1a0a1a);
+      border: 2px solid var(--accent-pink);
+      border-radius: 0;
+      font-family: 'Courier New', monospace;
+      font-size: 1.25rem;
+      text-align: left;
+      box-shadow: 
+        0 0 15px rgba(255, 0, 255, 0.2),
+        inset 0 0 10px rgba(128, 0, 255, 0.1);
+      transition: all 0.3s ease;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+    }
+    
+    .block:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        0 0 25px rgba(255, 0, 255, 0.4),
+        0 0 35px rgba(0, 255, 255, 0.3);
+      border-color: var(--accent-cyan);
+    }
+    
+    .block .wrong { 
+      color: #ff0040; 
+      font-weight: bold; 
+      text-shadow: 
+        0 0 10px rgba(255, 0, 64, 0.8),
+        0 0 20px rgba(255, 0, 64, 0.6);
+    }
+    
+    .block .correct { 
+      color: var(--accent-cyan); 
+      font-weight: bold; 
+      text-shadow: 
+        0 0 10px rgba(0, 255, 255, 0.8),
+        0 0 20px rgba(0, 255, 255, 0.6);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, var(--block-bg), #2a0a2a);
+      padding: 2rem;
+      border-radius: 0;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 
+        0 0 50px rgba(255, 0, 255, 0.4),
+        0 0 100px rgba(0, 255, 255, 0.3),
+        inset 0 0 20px rgba(128, 0, 255, 0.2);
+      border: 3px solid;
+      border-image: linear-gradient(45deg, var(--accent-pink), var(--accent-cyan), var(--accent-purple)) 1;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(45deg, transparent 0%, rgba(255, 0, 255, 0.05) 25%, transparent 50%, rgba(0, 255, 255, 0.05) 75%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+      animation: modalGlow 2s ease-in-out infinite;
+    }
+    
+    @keyframes modalGlow {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+    
+    #modal-message { 
+      margin-bottom: 1rem; 
+      position: relative;
+      z-index: 1;
+    }
+    
+    #name-input, .modal-button {
+      width: 80%;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      border: 2px solid var(--accent-pink);
+      border-radius: 0;
+      background: linear-gradient(135deg, rgba(26, 10, 26, 0.9), rgba(42, 10, 42, 0.9));
+      color: var(--text-color);
+      font-size: 1rem;
+      outline: none;
+      font-family: 'Courier New', monospace;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+    }
+    
+    #name-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 
+        inset 0 0 15px rgba(0, 255, 255, 0.3),
+        0 0 25px rgba(0, 255, 255, 0.4);
+    }
+    
+    .modal-button {
+      cursor: pointer;
+      background: linear-gradient(45deg, var(--accent-pink), var(--accent-purple));
+      color: var(--text-color);
+      border: none;
+      font-weight: bold;
+      box-shadow: 
+        0 0 20px rgba(255, 0, 255, 0.4),
+        inset 0 0 10px rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+    
+    .modal-button:hover {
+      background: linear-gradient(45deg, var(--accent-cyan), var(--accent-yellow));
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.5),
+        0 0 40px rgba(255, 255, 0, 0.3);
+    }
+    
+    #log-container { 
+      margin-top: 2rem; 
+      position: relative;
+      z-index: 1;
+    }
+    
+    #log-container h2 { 
+      text-align: center; 
+      margin-bottom: 0.5rem; 
+      font-size: 1.5rem; 
+      color: var(--accent-yellow);
+      text-shadow: 
+        0 0 10px rgba(255, 255, 0, 0.6),
+        0 0 20px rgba(255, 255, 0, 0.4);
+    }
+    
+    #log-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      background: linear-gradient(135deg, rgba(26, 10, 26, 0.9), rgba(42, 10, 42, 0.9));
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: 
+        0 0 20px rgba(255, 0, 255, 0.2),
+        inset 0 0 10px rgba(128, 0, 255, 0.1);
+    }
+    
+    #log-table colgroup col:first-child { width: 50%; }
+    #log-table colgroup col:nth-child(2),
+    #log-table colgroup col:nth-child(3),
+    #log-table colgroup col:nth-child(4) { width: 16.66%; }
+    
+    #log-table th, #log-table td {
+      border: 1px solid rgba(255, 0, 255, 0.4);
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.2);
+    }
+    
+    #log-table th { 
+      background: linear-gradient(135deg, #2a0a2a, #1a0a1a);
+      color: var(--accent-yellow);
+      font-weight: bold;
+      text-shadow: 
+        0 0 8px rgba(255, 255, 0, 0.6),
+        0 0 16px rgba(255, 255, 0, 0.4);
+    }
+    
+    #log-table td:hover {
+      background: rgba(255, 0, 255, 0.1);
+      color: var(--accent-cyan);
+      text-shadow: 
+        0 0 8px rgba(0, 255, 255, 0.6),
+        0 0 16px rgba(0, 255, 255, 0.4);
+    }
+    
+    /* Vaporwave-themed animations */
+    @keyframes neonPulse {
+      0%, 100% {
+        box-shadow: 
+          0 0 5px currentColor,
+          0 0 10px currentColor,
+          0 0 15px currentColor;
+      }
+      50% {
+        box-shadow: 
+          0 0 10px currentColor,
+          0 0 20px currentColor,
+          0 0 30px currentColor;
+      }
+    }
+    
+    .neon-text {
+      animation: neonPulse 2s ease-in-out infinite;
+    }
+    
+    /* Grid pattern overlay */
+    .grid-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(255, 0, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 255, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+      z-index: -3;
+      opacity: 0.3;
+    }
+  </style>
+</head>
+<body>
+  <!-- Grid overlay for retro feel -->
+  <div class="grid-overlay"></div>
+
+  <div class="container">
+    <h1 class="neon-text">◢◤ Pi Memory Test - Retro Vaporwave ◢◤</h1>
+    <div id="pi-container">
+      <span class="pi-prefix">3.</span>
+      <input id="pi-input" type="text" autocomplete="off" autofocus />
+    </div>
+    <div id="log-container">
+      <h2 class="neon-text">◢◤ Attempts ◢◤</h2>
+      <table id="log-table">
+        <colgroup>
+          <col>
+          <col>
+          <col>
+          <col>
+        </colgroup>
+        <thead>
+          <tr>
+            <th data-col="0">◢◤ Name</th>
+            <th data-col="1">◢◤ Digits</th>
+            <th data-col="2">⏳</th>
+            <th data-col="3">📅</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div id="modal-message"></div>
+      <input id="name-input" type="text" placeholder="Name (optional)" />
+      <button id="submit-button" class="modal-button">◢◤ Submit Score ◢◤</button>
+      <button id="skip-button" class="modal-button">◢◤ Skip & Try Again ◢◤</button>
+    </div>
+  </div>
+
+  <script>
+    // ==== kvdb.io leaderboard config ====
+    // Replace this with your kvdb.io bucket ID (get it free at https://kvdb.io)
+    const KVDB_BUCKET = 'REPLACE_WITH_YOUR_BUCKET_ID'; // e.g. 'abcd1234dfgqwr'
+    const KVDB_KEY = 'pi-memory-leaderboard'; // Can be any string you want
+    const KVDB_URL = `https://kvdb.io/${KVDB_BUCKET}/${KVDB_KEY}`;
+
+    // In-memory list of attempts
+    let attempts = [];
+
+    // Utility to pad numbers
+    function pad(n) { return n < 10 ? '0'+n : n; }
+
+    // ---- Load attempts from kvdb.io ----
+    async function loadAttempts() {
+      try {
+        const resp = await fetch(KVDB_URL, { cache: 'no-store' });
+        if (!resp.ok) throw new Error('Not found');
+        const text = await resp.text();
+        attempts = text ? JSON.parse(text) : [];
+      } catch (e) {
+        attempts = [];
+      }
+      renderTable();
+    }
+
+    // ---- Save attempts to kvdb.io ----
+    async function saveAttempts() {
+      try {
+        // For multi-user, you may want to GET again and merge before PUT, to avoid race conditions.
+        await fetch(KVDB_URL, {
+          method: 'PUT',
+          body: JSON.stringify(attempts),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        alert('Failed to save attempts to leaderboard. Please try again!');
+      }
+    }
+
+    // Sorting state
+    const sortDir = {};
+
+    // Render the table from attempts[]
+    function renderTable() {
+      const tbody = document.querySelector('#log-table tbody');
+      tbody.innerHTML = '';
+      attempts.forEach(({name, digits, time, date}) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${name}</td><td>${digits}</td><td>${time}</td><td>${date}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Table sorting
+    function sortTable(colIndex) {
+      const isNumeric = colIndex === 1;
+      const isTime = colIndex === 2;
+      const isDate = colIndex === 3;
+      let dir = sortDir[colIndex] || 1;
+      attempts.sort((a, b) => {
+        let A, B;
+        if (colIndex === 0) {
+          A = a.name.toLowerCase(); B = b.name.toLowerCase();
+        } else if (isNumeric) {
+          A = a.digits; B = b.digits;
+        } else if (isTime) {
+          const toSec = s => {
+            const [m, s2] = s.split(':').map(x => parseInt(x, 10) || 0);
+            return m * 60 + s2;
+          };
+          A = toSec(a.time); B = toSec(b.time);
+        } else if (isDate) {
+          A = new Date(a.date); B = new Date(b.date);
+        }
+        let cmp = A > B ? 1 : A < B ? -1 : 0;
+        sortDir[colIndex] = -dir;
+        return dir * cmp;
+      });
+      renderTable();
+    }
+
+    // Attach sort handlers
+    document.querySelectorAll('#log-table th').forEach(th => {
+      th.addEventListener('click', () => sortTable(+th.dataset.col));
+    });
+
+    // Pi and modal logic
+    const piDigits =
+      '14159265358979323846264338327950288419716939937510' +
+      '58209749445923078164062862089986280348253421170679' +
+      '82148086513282306647093844609550582231725359408128' +
+      '48111745028410270193852110555964462294895493038196';
+    let startTime = null;
+    let lastErrorIndex = 0;
+
+    const input = document.getElementById('pi-input');
+    const modal = document.getElementById('modal');
+    const message = document.getElementById('modal-message');
+    const nameInput = document.getElementById('name-input');
+    const submitBtn = document.getElementById('submit-button');
+    const skipBtn = document.getElementById('skip-button');
+
+    // Show error modal
+    input.addEventListener('input', () => {
+      const v = input.value;
+      if (!startTime && v.length === 1) startTime = Date.now();
+      for (let i = 0; i < v.length; i++) {
+        if (v[i] !== piDigits[i]) {
+          lastErrorIndex = i;
+          const entered = v.slice(-5).padStart(5, ' ');
+          const correctFull = piDigits.slice(0, i + 1);
+          const correct = correctFull.slice(-5).padStart(5, ' ');
+          const nextFive = piDigits.slice(i + 1, i + 6);
+          let entArr = entered.split('');
+          let idx = (entered.trim().length - 1) || 0;
+          entArr[idx] = `<span class="wrong">${entArr[idx]}</span>`;
+          let corArr = correct.split('');
+          corArr[4] = `<span class="correct">${corArr[4]}</span>`;
+          const prefix = correctFull.length > 5 ? '...' : '';
+          message.innerHTML =
+            `<div class="block">Entered: ${entArr.join('')}</div>` +
+            `<div class="block">Correct: ${prefix}${corArr.join('')} ${nextFive}</div>`;
+          input.disabled = true;
+          modal.style.display = 'flex';
+          break;
+        }
+      }
+    });
+
+    // Click outside modal to reset
+    modal.addEventListener('click', e => {
+      if (e.target === modal) resetFields();
+    });
+
+    // Reset fields & hide modal
+    function resetFields() {
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+      message.innerHTML = '';
+      modal.style.display = 'none';
+      nameInput.value = '';
+      startTime = null;
+    }
+
+    // Skip button
+    skipBtn.addEventListener('click', resetFields);
+
+    // Submit score: update UI and save to kvdb.io
+    submitBtn.addEventListener('click', async () => {
+      const elapsed = Date.now() - startTime;
+      const mins = Math.floor(elapsed / 60000);
+      const secs = Math.floor((elapsed % 60000) / 1000);
+      const timeStr = `${pad(mins)}:${pad(secs)}`;
+      const dateStr = new Date().toLocaleDateString();
+      const nameVal = nameInput.value.trim();
+
+      // update in-memory table immediately
+      attempts.unshift({ name: nameVal, digits: lastErrorIndex, time: timeStr, date: dateStr });
+      renderTable();
+
+      // Save to kvdb.io
+      await saveAttempts();
+
+      resetFields();
+    });
+
+    // Load table on startup
+    loadAttempts();
+  </script>
+</body>
+</html>

@@ -156,7 +156,10 @@ class GameManager {
                     status: "In Progress",
                     category: "games",
                     versions: [
-                        { name: "Main Version", path: "Games/PiTrainer/index.html" }
+                        { name: "Main Version", path: "Games/PiTrainer/index.html" },
+                        { name: "Nature Organic", path: "Games/PiTrainer/pitrainer-nature-organic.html" },
+                        { name: "Retro Vaporwave", path: "Games/PiTrainer/pitrainer-retro-vaporwave.html" },
+                        { name: "Minimalist Glass", path: "Games/PiTrainer/pitrainer-minimalist-glass.html" }
                     ]
                 },
                 {

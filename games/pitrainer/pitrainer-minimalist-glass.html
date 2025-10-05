@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pi Memory Test - Minimalist Glass</title>
+  <style>
+    :root {
+      --primary-color: #f8fafc;
+      --secondary-color: #3b82f6;
+      --text-color: #1e293b;
+      --block-bg: rgba(255, 255, 255, 0.1);
+      --accent-blue: #2563eb;
+      --accent-gray: #64748b;
+      --accent-white: #ffffff;
+      --glass-bg: rgba(255, 255, 255, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.18);
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Glass background effects */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(99, 102, 241, 0.06) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -2;
+      animation: glassFloat 30s ease-in-out infinite;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%),
+        linear-gradient(-45deg, transparent 30%, rgba(255, 255, 255, 0.03) 50%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+      animation: glassShift 25s ease-in-out infinite;
+    }
+    
+    @keyframes glassFloat {
+      0%, 100% { 
+        transform: translate(0, 0) rotate(0deg) scale(1); 
+        opacity: 1;
+      }
+      33% { 
+        transform: translate(15px, -15px) rotate(120deg) scale(1.02); 
+        opacity: 0.9;
+      }
+      66% { 
+        transform: translate(-10px, 10px) rotate(240deg) scale(0.98); 
+        opacity: 0.95;
+      }
+    }
+    
+    @keyframes glassShift {
+      0%, 100% { 
+        transform: translateX(0) translateY(0); 
+      }
+      50% { 
+        transform: translateX(10px) translateY(-10px); 
+      }
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    h1 { 
+      text-align: center; 
+      margin-bottom: 1rem; 
+      font-size: 2.5rem; 
+      font-weight: 300;
+      color: var(--accent-white);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+      letter-spacing: -0.02em;
+    }
+    
+    #pi-container { 
+      display: flex; 
+      align-items: center; 
+      margin-bottom: 1rem; 
+      position: relative;
+      z-index: 1;
+    }
+    
+    .pi-prefix { 
+      font-size: 2rem; 
+      margin-right: 0.5rem; 
+      color: var(--accent-white);
+      font-weight: 300;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    #pi-input {
+      font-size: 2rem;
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--accent-white);
+      outline: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 300;
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    #pi-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    #pi-input:focus {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 8px 24px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
+    
+    .block {
+      display: inline-block;
+      padding: 0.75rem 1rem;
+      margin: 0.25rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 1.25rem;
+      font-weight: 300;
+      text-align: left;
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      color: var(--accent-white);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .block:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    .block .wrong { 
+      color: #fca5a5; 
+      font-weight: 400; 
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .block .correct { 
+      color: #86efac; 
+      font-weight: 400; 
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 2rem;
+      border-radius: 24px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    #modal-message { 
+      margin-bottom: 1rem; 
+      position: relative;
+      z-index: 1;
+      color: var(--accent-white);
+    }
+    
+    #name-input, .modal-button {
+      width: 80%;
+      margin: 0.5rem 0;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--accent-white);
+      font-size: 1rem;
+      outline: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 300;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    #name-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    #name-input:focus {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-button {
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--accent-white);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-weight: 400;
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .modal-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    #log-container { 
+      margin-top: 2rem; 
+      position: relative;
+      z-index: 1;
+    }
+    
+    #log-container h2 { 
+      text-align: center; 
+      margin-bottom: 0.5rem; 
+      font-size: 1.5rem; 
+      font-weight: 300;
+      color: var(--accent-white);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    #log-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    #log-table colgroup col:first-child { width: 50%; }
+    #log-table colgroup col:nth-child(2),
+    #log-table colgroup col:nth-child(3),
+    #log-table colgroup col:nth-child(4) { width: 16.66%; }
+    
+    #log-table th, #log-table td {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--accent-white);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    #log-table th { 
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--accent-white);
+      font-weight: 400;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    #log-table td:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Minimalist animations */
+    @keyframes subtleFloat {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-2px);
+      }
+    }
+    
+    .floating {
+      animation: subtleFloat 3s ease-in-out infinite;
+    }
+    
+    /* Glass morphism effects */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Subtle particle effects */
+    .particle {
+      position: fixed;
+      width: 2px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+      animation: particleFloat 8s linear infinite;
+    }
+    
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(20px);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Subtle floating particles -->
+  <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+  <div class="particle" style="left: 20%; animation-delay: -1s;"></div>
+  <div class="particle" style="left: 30%; animation-delay: -2s;"></div>
+  <div class="particle" style="left: 40%; animation-delay: -3s;"></div>
+  <div class="particle" style="left: 50%; animation-delay: -4s;"></div>
+  <div class="particle" style="left: 60%; animation-delay: -5s;"></div>
+  <div class="particle" style="left: 70%; animation-delay: -6s;"></div>
+  <div class="particle" style="left: 80%; animation-delay: -7s;"></div>
+  <div class="particle" style="left: 90%; animation-delay: -8s;"></div>
+
+  <div class="container floating">
+    <h1>Pi Memory Test - Minimalist Glass</h1>
+    <div id="pi-container">
+      <span class="pi-prefix">3.</span>
+      <input id="pi-input" type="text" autocomplete="off" autofocus />
+    </div>
+    <div id="log-container">
+      <h2>Attempts</h2>
+      <table id="log-table">
+        <colgroup>
+          <col>
+          <col>
+          <col>
+          <col>
+        </colgroup>
+        <thead>
+          <tr>
+            <th data-col="0">Name</th>
+            <th data-col="1">Digits</th>
+            <th data-col="2">⏳</th>
+            <th data-col="3">📅</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div id="modal-message"></div>
+      <input id="name-input" type="text" placeholder="Name (optional)" />
+      <button id="submit-button" class="modal-button">Submit Score</button>
+      <button id="skip-button" class="modal-button">Skip & Try Again</button>
+    </div>
+  </div>
+
+  <script>
+    // ==== kvdb.io leaderboard config ====
+    // Replace this with your kvdb.io bucket ID (get it free at https://kvdb.io)
+    const KVDB_BUCKET = 'REPLACE_WITH_YOUR_BUCKET_ID'; // e.g. 'abcd1234dfgqwr'
+    const KVDB_KEY = 'pi-memory-leaderboard'; // Can be any string you want
+    const KVDB_URL = `https://kvdb.io/${KVDB_BUCKET}/${KVDB_KEY}`;
+
+    // In-memory list of attempts
+    let attempts = [];
+
+    // Utility to pad numbers
+    function pad(n) { return n < 10 ? '0'+n : n; }
+
+    // ---- Load attempts from kvdb.io ----
+    async function loadAttempts() {
+      try {
+        const resp = await fetch(KVDB_URL, { cache: 'no-store' });
+        if (!resp.ok) throw new Error('Not found');
+        const text = await resp.text();
+        attempts = text ? JSON.parse(text) : [];
+      } catch (e) {
+        attempts = [];
+      }
+      renderTable();
+    }
+
+    // ---- Save attempts to kvdb.io ----
+    async function saveAttempts() {
+      try {
+        // For multi-user, you may want to GET again and merge before PUT, to avoid race conditions.
+        await fetch(KVDB_URL, {
+          method: 'PUT',
+          body: JSON.stringify(attempts),
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        alert('Failed to save attempts to leaderboard. Please try again!');
+      }
+    }
+
+    // Sorting state
+    const sortDir = {};
+
+    // Render the table from attempts[]
+    function renderTable() {
+      const tbody = document.querySelector('#log-table tbody');
+      tbody.innerHTML = '';
+      attempts.forEach(({name, digits, time, date}) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${name}</td><td>${digits}</td><td>${time}</td><td>${date}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Table sorting
+    function sortTable(colIndex) {
+      const isNumeric = colIndex === 1;
+      const isTime = colIndex === 2;
+      const isDate = colIndex === 3;
+      let dir = sortDir[colIndex] || 1;
+      attempts.sort((a, b) => {
+        let A, B;
+        if (colIndex === 0) {
+          A = a.name.toLowerCase(); B = b.name.toLowerCase();
+        } else if (isNumeric) {
+          A = a.digits; B = b.digits;
+        } else if (isTime) {
+          const toSec = s => {
+            const [m, s2] = s.split(':').map(x => parseInt(x, 10) || 0);
+            return m * 60 + s2;
+          };
+          A = toSec(a.time); B = toSec(b.time);
+        } else if (isDate) {
+          A = new Date(a.date); B = new Date(b.date);
+        }
+        let cmp = A > B ? 1 : A < B ? -1 : 0;
+        sortDir[colIndex] = -dir;
+        return dir * cmp;
+      });
+      renderTable();
+    }
+
+    // Attach sort handlers
+    document.querySelectorAll('#log-table th').forEach(th => {
+      th.addEventListener('click', () => sortTable(+th.dataset.col));
+    });
+
+    // Pi and modal logic
+    const piDigits =
+      '14159265358979323846264338327950288419716939937510' +
+      '58209749445923078164062862089986280348253421170679' +
+      '82148086513282306647093844609550582231725359408128' +
+      '48111745028410270193852110555964462294895493038196';
+    let startTime = null;
+    let lastErrorIndex = 0;
+
+    const input = document.getElementById('pi-input');
+    const modal = document.getElementById('modal');
+    const message = document.getElementById('modal-message');
+    const nameInput = document.getElementById('name-input');
+    const submitBtn = document.getElementById('submit-button');
+    const skipBtn = document.getElementById('skip-button');
+
+    // Show error modal
+    input.addEventListener('input', () => {
+      const v = input.value;
+      if (!startTime && v.length === 1) startTime = Date.now();
+      for (let i = 0; i < v.length; i++) {
+        if (v[i] !== piDigits[i]) {
+          lastErrorIndex = i;
+          const entered = v.slice(-5).padStart(5, ' ');
+          const correctFull = piDigits.slice(0, i + 1);
+          const correct = correctFull.slice(-5).padStart(5, ' ');
+          const nextFive = piDigits.slice(i + 1, i + 6);
+          let entArr = entered.split('');
+          let idx = (entered.trim().length - 1) || 0;
+          entArr[idx] = `<span class="wrong">${entArr[idx]}</span>`;
+          let corArr = correct.split('');
+          corArr[4] = `<span class="correct">${corArr[4]}</span>`;
+          const prefix = correctFull.length > 5 ? '...' : '';
+          message.innerHTML =
+            `<div class="block">Entered: ${entArr.join('')}</div>` +
+            `<div class="block">Correct: ${prefix}${corArr.join('')} ${nextFive}</div>`;
+          input.disabled = true;
+          modal.style.display = 'flex';
+          break;
+        }
+      }
+    });
+
+    // Click outside modal to reset
+    modal.addEventListener('click', e => {
+      if (e.target === modal) resetFields();
+    });
+
+    // Reset fields & hide modal
+    function resetFields() {
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+      message.innerHTML = '';
+      modal.style.display = 'none';
+      nameInput.value = '';
+      startTime = null;
+    }
+
+    // Skip button
+    skipBtn.addEventListener('click', resetFields);
+
+    // Submit score: update UI and save to kvdb.io
+    submitBtn.addEventListener('click', async () => {
+      const elapsed = Date.now() - startTime;
+      const mins = Math.floor(elapsed / 60000);
+      const secs = Math.floor((elapsed % 60000) / 1000);
+      const timeStr = `${pad(mins)}:${pad(secs)}`;
+      const dateStr = new Date().toLocaleDateString();
+      const nameVal = nameInput.value.trim();
+
+      // update in-memory table immediately
+      attempts.unshift({ name: nameVal, digits: lastErrorIndex, time: timeStr, date: dateStr });
+      renderTable();
+
+      // Save to kvdb.io
+      await saveAttempts();
+
+      resetFields();
+    });
+
+    // Load table on startup
+    loadAttempts();
+  </script>
+</body>
+</html>
