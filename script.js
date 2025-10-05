@@ -132,7 +132,9 @@ class GameManager {
                     icon: "🧠",
                     status: "Complete",
                     category: "games",
-                    path: "Games/Verbal%20Memory%20Grid/index.html"
+                    versions: [
+                        { name: "Original", path: "Games/Verbal%20Memory%20Grid/index.html" }
+                    ]
                 },
                 {
                     id: "orb-survival",
