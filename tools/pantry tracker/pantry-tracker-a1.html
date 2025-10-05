@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Pantry Tracker Version A1
+    A food inventory management system for tracking items with expiry dates
+    using simple day-based input for better user experience.
+  -->
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pantry Tracker A1</title>
+  
+  <!-- Google Fonts: Inter for clean typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       PANTRY TRACKER DESIGN SYSTEM
+       ======================================== */
+    
+    :root {
+      /* === FOOD-FOCUSED COLOR PALETTE === */
+      --bg: #f8fafc;           /* Light blue-gray background */
+      --panel: #ffffff;        /* Clean white panels */
+      --panel-2: #f1f5f9;      /* Subtle gray for depth */
+      --ink: #1e293b;          /* Dark slate text */
+      --ink-dim: #64748b;      /* Muted slate text */
+      --line: #e2e8f0;         /* Light gray borders */
+      
+      /* === FOOD-THEMED ACCENTS === */
+      --accent: #059669;       /* Fresh green */
+      --accent-dim: #047857;   /* Darker green */
+      --warning: #d97706;      /* Orange for expiring soon */
+      --danger: #dc2626;       /* Red for expired */
+      --info: #2563eb;         /* Blue for info */
+      
+      /* === LAYOUT DIMENSIONS === */
+      --row-h: 52px;           /* Generous row height for food items */
+      --head-h: 60px;          /* Spacious headers */
+      
+      /* === VISUAL EFFECTS === */
+      --radius: 12px;          /* Rounded corners */
+      --shadow: 0 4px 12px rgba(0,0,0,.08);  /* Subtle shadow */
+    }
+    
+    /* ========================================
+       GLOBAL RESET & BASE STYLES
+       ======================================== */
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: -.01em;
+      line-height: 1.5;
+    }
+    
+    /* ========================================
+       HEADER SECTION
+       ======================================== */
+    
+    .header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 24px 32px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -.02em;
+    }
+    
+    .header p {
+      margin: 8px 0 0;
+      color: var(--ink-dim);
+      font-size: 16px;
+    }
+    
+    /* ========================================
+       MAIN CONTAINER LAYOUT
+       ======================================== */
+    
+    .main-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+    
+    /* ========================================
+       QUICK ADD SECTION
+       ======================================== */
+    
+    .quick-add {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    
+    .add-form {
+      display: grid;
+      grid-template-columns: 2fr auto auto;
+      gap: 12px;
+      align-items: end;
+    }
+    
+    .food-input {
+      padding: 12px 16px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      transition: border-color .15s ease;
+    }
+    
+    .food-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+    
+    .food-input::placeholder {
+      color: var(--ink-dim);
+      opacity: .7;
+    }
+    
+    .days-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .days-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    
+    .days-input {
+      padding: 12px 16px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: border-color .15s ease;
+      width: 80px;
+    }
+    
+    .days-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    .add-btn {
+      padding: 12px 24px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color .15s ease;
+    }
+    
+    .add-btn:hover {
+      background: var(--accent-dim);
+    }
+    
+    .add-btn:disabled {
+      background: var(--ink-dim);
+      cursor: not-allowed;
+    }
+    
+    /* ========================================
+       ALERTS SECTION
+       ======================================== */
+    
+    .alerts-section {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .alert-header h2 {
+      margin: 0 0 16px;
+      color: var(--danger);
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .alerts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .alert-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .alert-item.expired {
+      background: rgba(220, 38, 38, 0.15);
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+    
+    .alert-item.expiring-soon {
+      background: rgba(217, 119, 6, 0.1);
+      border-color: rgba(217, 119, 6, 0.2);
+    }
+    
+    .alert-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .alert-location {
+      color: var(--ink-dim);
+      font-size: 12px;
+    }
+    
+    /* ========================================
+       FOOD LIST SECTION
+       ======================================== */
+    
+    .food-list-section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+    
+    .list-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    
+    .filter-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .filter-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink-dim);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    
+    .filter-btn:hover {
+      background: var(--panel-2);
+      color: var(--ink);
+    }
+    
+    .filter-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .food-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    
+    .food-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .food-list::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 8px;
+    }
+    
+    .food-list::-webkit-scrollbar-thumb:hover {
+      background: var(--ink-dim);
+    }
+    
+    /* ========================================
+       FOOD ITEM CARDS
+       ======================================== */
+    
+    .food-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--line);
+      transition: background-color .15s ease;
+      position: relative;
+    }
+    
+    .food-item:hover {
+      background: var(--panel-2);
+    }
+    
+    .food-item:last-child {
+      border-bottom: none;
+    }
+    
+    .food-item.expired {
+      background: rgba(220, 38, 38, 0.05);
+    }
+    
+    .food-item.expiring-soon {
+      background: rgba(217, 119, 6, 0.05);
+    }
+    
+    .food-main {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+    
+    .food-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    
+    .food-details {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .expiry-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+    
+    .expiry-date {
+      font-size: 12px;
+      color: var(--ink-dim);
+    }
+    
+    .days-left {
+      font-size: 14px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    
+    .days-left.fresh {
+      background: rgba(5, 150, 105, 0.1);
+      color: var(--accent);
+    }
+    
+    .days-left.expiring-soon {
+      background: rgba(217, 119, 6, 0.1);
+      color: var(--warning);
+    }
+    
+    .days-left.expired {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--danger);
+    }
+    
+    /* ========================================
+       DELETE BUTTON
+       ======================================== */
+    
+    .delete-btn {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color .15s ease;
+    }
+    
+    .delete-btn:hover {
+      background: #b91c1c;
+    }
+    
+    /* ========================================
+       RESPONSIVE DESIGN
+       ======================================== */
+    
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 0 16px 32px;
+      }
+      
+      .add-form {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .days-input-group {
+        align-items: stretch;
+      }
+      
+      .days-input {
+        width: 100%;
+      }
+      
+      .header {
+        padding: 16px 20px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .list-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+      }
+      
+      .filter-controls {
+        justify-content: center;
+      }
+      
+      .food-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 16px;
+      }
+      
+      .food-main {
+        justify-content: space-between;
+      }
+      
+      .food-details {
+        justify-content: space-between;
+      }
+      
+      .expiry-info {
+        align-items: flex-start;
+      }
+    }
+    
+    /* ========================================
+       ANIMATIONS
+       ======================================== */
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .food-item {
+      animation: fadeIn .2s ease-out;
+    }
+    
+    /* ========================================
+       STATS DISPLAY
+       ======================================== */
+    
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      padding: 16px 20px;
+      background: var(--panel-2);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stat-number {
+      font-weight: 600;
+      color: var(--ink);
+    }
+    
+    .stat-label {
+      color: var(--ink-dim);
+    }
+    
+    /* ========================================
+       UTILITY CLASSES
+       ======================================== */
+    
+    .text-center { text-align: center; }
+    .text-muted { color: var(--ink-dim); }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🍎 Pantry Tracker</h1>
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-number" id="totalItems">0</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="expiringCount">0</span>
+        <span class="stat-label">Expiring</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="expiredCount">0</span>
+        <span class="stat-label">Expired</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- ========================================
+         QUICK ADD SECTION (ALWAYS VISIBLE)
+         ======================================== -->
+    <section class="quick-add">
+      <div class="add-form">
+        <input 
+          id="foodName" 
+          class="food-input" 
+          type="text" 
+          placeholder="What did you buy? (e.g., Milk, Bread, Apples)"
+          maxlength="50"
+        />
+        <div class="days-input-group">
+          <label class="days-label">⏰ Days Until Expiry</label>
+          <input 
+            id="daysInput" 
+            class="days-input" 
+            type="number"
+            min="1"
+            max="365"
+            placeholder="7"
+            title="How many days until this food expires?"
+          />
+        </div>
+        <button id="addFoodBtn" class="add-btn">Add</button>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         EXPIRING ALERTS (PROMINENT)
+         ======================================== -->
+    <section class="alerts-section" id="alertsSection" style="display: none;">
+      <div class="alert-header">
+        <h2>⚠️ Action Needed</h2>
+      </div>
+      <div class="alerts-list" id="alertsList">
+        <!-- Alert items will be dynamically inserted here -->
+      </div>
+    </section>
+    
+    <!-- ========================================
+         MAIN FOOD LIST
+         ======================================== -->
+    <section class="food-list-section">
+      <div class="list-header">
+        <h2>All Food Items</h2>
+        <div class="filter-controls">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="expired">🗑️ Expired</button>
+          <button class="filter-btn" data-filter="expiring">⚠️ Expiring</button>
+          <button class="filter-btn" data-filter="shelf-stable">👍 Shelf Stable</button>
+        </div>
+      </div>
+      
+      <div class="food-list" id="foodList">
+        <!-- Food items will be dynamically inserted here -->
+      </div>
+    </section>
+    
+  </main>
+
+  <script>
+    /* ========================================
+       DOM MANIPULATION UTILITIES
+       ======================================== */
+    
+    const $ = id => document.getElementById(id);
+    
+    const el = (tag, attrs = {}, kids = []) => {
+      const n = document.createElement(tag);
+      
+      for (const k in attrs) {
+        if (k === 'style') {
+          Object.assign(n.style, attrs.style);
+        } else if (k === 'dataset') {
+          Object.assign(n.dataset, attrs.dataset);
+        } else {
+          n[k] = attrs[k];
+        }
+      }
+      
+      kids.forEach(ch => n.appendChild(ch));
+      return n;
+    };
+    
+    const replace = (node, children) => node.replaceChildren(...children);
+
+    /* ========================================
+       APPLICATION STATE
+       ======================================== */
+    
+    const state = {
+      foods: {},                    // Food storage: {id: {name, purchaseDate, expiryDate}}
+      currentFilter: 'all'          // Current filter: 'all', 'expired', 'expiring', 'shelf-stable'
+    };
+    
+    const MIN_VISIBLE_ROWS = 8;
+
+    /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+    
+    const els = {
+      foodName: $('foodName'),
+      daysInput: $('daysInput'),
+      addBtn: $('addFoodBtn'),
+      totalItems: $('totalItems'),
+      expiringCount: $('expiringCount'),
+      expiredCount: $('expiredCount'),
+      alertsSection: $('alertsSection'),
+      alertsList: $('alertsList'),
+      foodList: $('foodList')
+    };
+
+    /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+    
+    const uid = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    
+    /**
+     * Calculates days between two dates
+     * @param {Date} date1 - First date
+     * @param {Date} date2 - Second date
+     * @returns {number} Days difference
+     */
+    const daysBetween = (date1, date2) => {
+      const oneDay = 24 * 60 * 60 * 1000;
+      return Math.round((date2 - date1) / oneDay);
+    };
+    
+    /**
+     * Gets expiry status for a food item
+     * @param {string} expiryDate - Expiry date string
+     * @returns {Object} Status object with type and days
+     */
+    const getExpiryStatus = (expiryDate) => {
+      const today = new Date();
+      const expiry = new Date(expiryDate);
+      const daysLeft = daysBetween(today, expiry);
+      
+      if (daysLeft < 0) {
+        return { type: 'expired', days: Math.abs(daysLeft) };
+      } else if (daysLeft <= 3) {
+        return { type: 'expiring-soon', days: daysLeft };
+      } else {
+        return { type: 'fresh', days: daysLeft };
+      }
+    };
+    
+    /**
+     * Formats date for display
+     * @param {string} dateString - Date string
+     * @returns {string} Formatted date
+     */
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    };
+
+    /* ========================================
+       FOOD MANAGEMENT FUNCTIONS
+       ======================================== */
+    
+    /**
+     * Adds a new food item
+     */
+    function addFoodItem() {
+      const name = els.foodName.value.trim();
+      const days = parseInt(els.daysInput.value) || 7; // Default to 7 if empty
+      
+      if (!name) {
+        alert('Please fill in food name');
+        return;
+      }
+      
+      if (days < 1) {
+        alert('Days must be 1 or more');
+        return;
+      }
+      
+      const today = new Date();
+      const purchaseDate = today.toISOString().split('T')[0];
+      
+      // Calculate expiry date by adding days to today
+      const expiryDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
+      const expiryDateString = expiryDate.toISOString().split('T')[0];
+      
+      const id = uid();
+      
+      state.foods[id] = {
+        name,
+        purchaseDate,
+        expiryDate: expiryDateString
+      };
+      
+      // Clear form
+      els.foodName.value = '';
+      els.daysInput.value = '';
+      
+      // Focus back on food name for quick entry
+      els.foodName.focus();
+      
+      renderAll();
+      saveToStorage();
+    }
+
+    /**
+     * Creates a food chip element
+     * @param {string} id - Food ID
+     * @returns {HTMLElement} Food chip element
+     */
+    const chipFor = id => {
+      const food = state.foods[id];
+      
+      if (!food) {
+        console.warn(`Food with id ${id} not found in state.foods`);
+        return el('span', {
+          className: 'food-chip',
+          textContent: '[Food not found]'
+        });
+      }
+      
+      const chip = el('span', { 
+        className: `food-chip` 
+      });
+      chip.textContent = food.name;
+      return chip;
+    };
+
+    /**
+     * Deletes a food item
+     * @param {string} id - Food ID to delete
+     */
+    function deleteFoodItem(id) {
+      if (!state.foods[id]) return;
+      
+      delete state.foods[id];
+      renderAll();
+      saveToStorage();
+    }
+    
+    /**
+     * Gets filtered food items based on current filter
+     * @returns {Array} Array of food IDs
+     */
+    function getFilteredFoods() {
+      const allFoods = Object.keys(state.foods);
+      
+      if (state.currentFilter === 'all') {
+        return allFoods;
+      } else if (state.currentFilter === 'expired') {
+        return allFoods.filter(id => {
+          const status = getExpiryStatus(state.foods[id].expiryDate);
+          return status.type === 'expired';
+        });
+      } else if (state.currentFilter === 'expiring') {
+        return allFoods.filter(id => {
+          const status = getExpiryStatus(state.foods[id].expiryDate);
+          return status.type === 'expiring-soon';
+        });
+      } else if (state.currentFilter === 'shelf-stable') {
+        return allFoods.filter(id => {
+          const status = getExpiryStatus(state.foods[id].expiryDate);
+          return status.type === 'fresh' && status.days > 30;
+        });
+      }
+      
+      return allFoods;
+    }
+
+    /* ========================================
+       RENDERING SYSTEM
+       ======================================== */
+    
+    /**
+     * Updates the statistics display
+     */
+    function updateStats() {
+      const totalItems = Object.keys(state.foods).length;
+      let expiringCount = 0;
+      let expiredCount = 0;
+      
+      Object.values(state.foods).forEach(food => {
+        const status = getExpiryStatus(food.expiryDate);
+        if (status.type === 'expiring-soon') {
+          expiringCount++;
+        } else if (status.type === 'expired') {
+          expiredCount++;
+        }
+      });
+      
+      els.totalItems.textContent = totalItems;
+      els.expiringCount.textContent = expiringCount;
+      els.expiredCount.textContent = expiredCount;
+    }
+
+    /**
+     * Re-renders all sections
+     */
+    function renderAll() {
+      updateStats();
+      renderAlerts();
+      renderFoodList();
+    }
+
+    /**
+     * Renders the alerts section
+     */
+    function renderAlerts() {
+      const expiringFoods = Object.keys(state.foods).filter(id => {
+        const status = getExpiryStatus(state.foods[id].expiryDate);
+        return status.type === 'expired' || status.type === 'expiring-soon';
+      });
+      
+      if (expiringFoods.length === 0) {
+        els.alertsSection.style.display = 'none';
+        return;
+      }
+      
+      els.alertsSection.style.display = 'block';
+      
+      const alertItems = expiringFoods.map(id => {
+        const food = state.foods[id];
+        const status = getExpiryStatus(food.expiryDate);
+        
+        const alertItem = el('div', {
+          className: `alert-item ${status.type}`
+        });
+        
+        const alertText = el('div', { className: 'alert-text' });
+        alertText.innerHTML = `
+          <strong>${food.name}</strong>
+        `;
+        
+        const alertAction = el('div', {
+          textContent: status.type === 'expired' 
+            ? `Expired ${status.days} day${status.days !== 1 ? 's' : ''} ago`
+            : `Expires in ${status.days} day${status.days !== 1 ? 's' : ''}`
+        });
+        
+        alertItem.appendChild(alertText);
+        alertItem.appendChild(alertAction);
+        
+        return alertItem;
+      });
+      
+      replace(els.alertsList, alertItems);
+    }
+
+    /**
+     * Renders the main food list
+     */
+    function renderFoodList() {
+      const filteredIds = getFilteredFoods();
+      
+      // Sort by expiry date (soonest first)
+      filteredIds.sort((a, b) => {
+        const dateA = new Date(state.foods[a].expiryDate);
+        const dateB = new Date(state.foods[b].expiryDate);
+        return dateA - dateB;
+      });
+      
+      const foodItems = filteredIds.map(id => {
+        const food = state.foods[id];
+        const status = getExpiryStatus(food.expiryDate);
+        
+        const foodItem = el('div', {
+          className: `food-item ${status.type}`
+        });
+        
+        const foodMain = el('div', { className: 'food-main' });
+        foodMain.innerHTML = `
+          <span class="food-name">${food.name}</span>
+        `;
+        
+        const foodDetails = el('div', { className: 'food-details' });
+        foodDetails.innerHTML = `
+          <div class="expiry-info">
+            <span class="expiry-date">Expires ${formatDate(food.expiryDate)}</span>
+            <span class="days-left ${status.type}">
+              ${status.type === 'expired' ? `-${status.days}d` : `${status.days}d left`}
+            </span>
+          </div>
+          <button class="delete-btn" title="Delete item">×</button>
+        `;
+        
+        const deleteBtn = foodDetails.querySelector('.delete-btn');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteFoodItem(id);
+        });
+        
+        foodItem.appendChild(foodMain);
+        foodItem.appendChild(foodDetails);
+        
+        return foodItem;
+      });
+      
+      replace(els.foodList, foodItems);
+    }
+
+    /* ========================================
+       FILTER SYSTEM
+       ======================================== */
+    
+    function setFilter(filter) {
+      state.currentFilter = filter;
+      
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+      
+      renderFoodList();
+    }
+
+    /* ========================================
+       LOCAL STORAGE
+       ======================================== */
+    
+    function saveToStorage() {
+      localStorage.setItem('pantry-tracker-data', JSON.stringify(state));
+    }
+    
+    function loadFromStorage() {
+      const saved = localStorage.getItem('pantry-tracker-data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        state.foods = parsed.foods || {};
+        state.currentFilter = parsed.currentFilter || 'all';
+      } else {
+        // Add some sample data for first-time users
+        addSampleData();
+      }
+    }
+    
+    function addSampleData() {
+      const today = new Date();
+      const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+      const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const nextMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+      
+      const sampleFoods = [
+        { name: 'Milk', purchaseDate: today.toISOString().split('T')[0], expiryDate: tomorrow.toISOString().split('T')[0] },
+        { name: 'Bread', purchaseDate: today.toISOString().split('T')[0], expiryDate: nextWeek.toISOString().split('T')[0] },
+        { name: 'Apples', purchaseDate: today.toISOString().split('T')[0], expiryDate: nextWeek.toISOString().split('T')[0] },
+        { name: 'Rice', purchaseDate: today.toISOString().split('T')[0], expiryDate: nextMonth.toISOString().split('T')[0] },
+        { name: 'Yogurt', purchaseDate: today.toISOString().split('T')[0], expiryDate: tomorrow.toISOString().split('T')[0] }
+      ];
+      
+      sampleFoods.forEach(food => {
+        const id = uid();
+        state.foods[id] = food;
+      });
+      
+      saveToStorage();
+    }
+
+    /* ========================================
+       INPUT HANDLING
+       ======================================== */
+    
+    els.addBtn.addEventListener('click', addFoodItem);
+    
+    // Add food on Enter key
+    [els.foodName, els.daysInput].forEach(input => {
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          addFoodItem();
+        }
+      });
+    });
+    
+    // Set default days value
+    els.daysInput.value = '7';
+    
+    // Filter button handlers
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setFilter(btn.dataset.filter);
+      });
+    });
+
+    /* ========================================
+       APPLICATION INITIALIZATION
+       ======================================== */
+    
+    function init() {
+      loadFromStorage();
+      renderAll();
+      
+      // Set initial filter
+      setFilter(state.currentFilter);
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+  </script>
+</body>
+</html>

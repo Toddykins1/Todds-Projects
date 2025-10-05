@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2D Physics Game</title>
+  <style>
+    html, body { margin: 0; overflow: hidden; height: 100%; background: #1a261a; }
+    canvas { display: block; }
+    #clock {
+      position: fixed;
+      top: 16px;
+      right: 28px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 24px;
+      background: rgba(0,0,0,0.3);
+      padding: 6px 18px;
+      border-radius: 14px;
+      letter-spacing: 2px;
+      z-index: 10;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="clock"></div>
+  <canvas id="game"></canvas>
+  <script src="game1.js"></script>
+  <script src="game2.js"></script>
+</body>
+</html>

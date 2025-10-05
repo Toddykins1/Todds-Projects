@@ -1,0 +1,20 @@
+# Handle spaces in folder names for Netlify
+/Games/Orb%20Survival/Orb%20Survival%20A1/index.html /Games/Orb%20Survival/Orb%20Survival%20A1/index.html 200
+/Games/Orb%20Survival/Version%20A2/index.html /Games/Orb%20Survival/Version%20A2/index.html 200
+/Games/Verbal%20Memory%20Grid/index.html /Games/Verbal%20Memory%20Grid/index.html 200
+/Games/Verbal%20Memory%20Grid/Audio%20Version/index.html /Games/Verbal%20Memory%20Grid/Audio%20Version/index.html 200
+/Games/Top-Down%20Survival%20Game/index.html /Games/Top-Down%20Survival%20Game/index.html 200
+/Tools/Password%20Analyzer/password-analyzer.html /Tools/Password%20Analyzer/password-analyzer.html 200
+/Tools/Task%20Board/index.html /Tools/Task%20Board/index.html 200
+/Tools/Task%20Board/cyberpunk.html /Tools/Task%20Board/cyberpunk.html 200
+/Tools/Task%20Board/doom-metal.html /Tools/Task%20Board/doom-metal.html 200
+/Tools/Task%20Board/doom-reimagined.html /Tools/Task%20Board/doom-reimagined.html 200
+/Tools/Task%20Board/impressionist.html /Tools/Task%20Board/impressionist.html 200
+/Tools/Task%20Board/kawaii.html /Tools/Task%20Board/kawaii.html 200
+/Tools/Task%20Board/minimalist.html /Tools/Task%20Board/minimalist.html 200
+/Tools/Task%20Board/neopets.html /Tools/Task%20Board/neopets.html 200
+/Tools/Task%20Board/rainbow.html /Tools/Task%20Board/rainbow.html 200
+/Tools/Task%20Board/surrealist.html /Tools/Task%20Board/surrealist.html 200
+
+# Fallback for any 404s
+/* /index.html 200

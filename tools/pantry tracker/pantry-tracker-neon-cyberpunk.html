@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Pantry Tracker - Neon Cyberpunk Edition
+    A futuristic food inventory management system with dark theme,
+    neon accents, and cyberpunk aesthetics.
+  -->
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pantry Tracker - Neon Cyberpunk</title>
+  
+  <!-- Google Fonts: Orbitron for futuristic typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       NEON CYBERPUNK DESIGN SYSTEM
+       ======================================== */
+    
+    :root {
+      /* === CYBERPUNK COLOR PALETTE === */
+      --bg: #0a0a0f;           /* Deep space black */
+      --bg-secondary: #1a1a2e; /* Dark purple-gray */
+      --panel: #16213e;        /* Dark blue panel */
+      --panel-2: #0f3460;      /* Lighter blue panel */
+      --ink: #e94560;          /* Neon pink text */
+      --ink-dim: #a8a8a8;      /* Muted gray text */
+      --line: #2d3748;         /* Dark borders */
+      
+      /* === NEON ACCENTS === */
+      --accent: #00f5ff;       /* Cyan neon */
+      --accent-dim: #00d4ff;   /* Bright cyan */
+      --warning: #ff6b35;      /* Orange neon */
+      --danger: #ff073a;       /* Red neon */
+      --success: #39ff14;      /* Green neon */
+      --purple: #bf00ff;       /* Purple neon */
+      
+      /* === LAYOUT DIMENSIONS === */
+      --row-h: 60px;           /* Taller rows for futuristic feel */
+      --head-h: 80px;          /* Spacious headers */
+      
+      /* === VISUAL EFFECTS === */
+      --radius: 8px;           /* Sharp corners */
+      --shadow: 0 0 20px rgba(0, 245, 255, 0.3);  /* Neon glow */
+      --glow: 0 0 10px currentColor;  /* Text glow */
+    }
+    
+    /* ========================================
+       GLOBAL RESET & BASE STYLES
+       ======================================== */
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, var(--bg) 0%, var(--bg-secondary) 100%);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: -.01em;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(0, 245, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 255, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      z-index: -1;
+    }
+    
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+    
+    /* ========================================
+       HEADER SECTION
+       ======================================== */
+    
+    .header {
+      background: linear-gradient(135deg, var(--panel) 0%, var(--panel-2) 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 24px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+      animation: scanLine 3s ease-in-out infinite;
+    }
+    
+    @keyframes scanLine {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-family: 'Orbitron', monospace;
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-shadow: var(--glow);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header p {
+      margin: 8px 0 0;
+      color: var(--ink-dim);
+      font-size: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* ========================================
+       MAIN CONTAINER LAYOUT
+       ======================================== */
+    
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+    
+    /* ========================================
+       QUICK ADD SECTION
+       ======================================== */
+    
+    .quick-add {
+      background: var(--panel);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .quick-add::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--purple), var(--accent));
+      animation: borderGlow 2s ease-in-out infinite;
+    }
+    
+    @keyframes borderGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    
+    .add-form {
+      display: grid;
+      grid-template-columns: 2fr auto auto;
+      gap: 16px;
+      align-items: end;
+    }
+    
+    .food-input {
+      padding: 16px 20px;
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
+      color: var(--ink);
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .food-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+      background: var(--panel-2);
+    }
+    
+    .food-input::placeholder {
+      color: var(--ink-dim);
+      opacity: 0.7;
+    }
+    
+    .days-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .days-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-shadow: var(--glow);
+    }
+    
+    .days-input {
+      padding: 16px 20px;
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
+      color: var(--ink);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      width: 100px;
+    }
+    
+    .days-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+    }
+    
+    .add-btn {
+      padding: 16px 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Orbitron', monospace;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .add-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .add-btn:hover::before {
+      left: 100%;
+    }
+    
+    .add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 245, 255, 0.4);
+    }
+    
+    .add-btn:disabled {
+      background: var(--ink-dim);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    /* ========================================
+       ALERTS SECTION
+       ======================================== */
+    
+    .alerts-section {
+      background: linear-gradient(135deg, rgba(255, 7, 58, 0.2), rgba(255, 107, 53, 0.1));
+      border: 2px solid var(--danger);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 0 20px rgba(255, 7, 58, 0.3);
+      position: relative;
+    }
+    
+    .alerts-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--danger), var(--warning), var(--danger));
+      animation: alertPulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes alertPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    
+    .alert-header h2 {
+      margin: 0 0 16px;
+      color: var(--danger);
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Orbitron', monospace;
+      text-shadow: var(--glow);
+    }
+    
+    .alerts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .alert-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: rgba(255, 7, 58, 0.1);
+      border: 1px solid var(--danger);
+      border-radius: var(--radius);
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .alert-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--danger);
+      animation: alertBlink 1s ease-in-out infinite;
+    }
+    
+    @keyframes alertBlink {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    
+    .alert-item.expired {
+      background: rgba(255, 7, 58, 0.15);
+      border-color: var(--danger);
+    }
+    
+    .alert-item.expiring-soon {
+      background: rgba(255, 107, 53, 0.1);
+      border-color: var(--warning);
+    }
+    
+    .alert-text {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .alert-location {
+      color: var(--ink-dim);
+      font-size: 12px;
+    }
+    
+    /* ========================================
+       FOOD LIST SECTION
+       ======================================== */
+    
+    .food-list-section {
+      background: var(--panel);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 28px;
+      border-bottom: 2px solid var(--accent);
+      background: linear-gradient(135deg, var(--panel-2), var(--panel));
+    }
+    
+    .list-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Orbitron', monospace;
+      color: var(--accent);
+      text-shadow: var(--glow);
+    }
+    
+    .filter-controls {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .filter-btn {
+      padding: 12px 20px;
+      border: 2px solid var(--line);
+      background: var(--bg-secondary);
+      color: var(--ink-dim);
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Orbitron', monospace;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .filter-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+      transition: left 0.3s ease;
+    }
+    
+    .filter-btn:hover::before {
+      left: 100%;
+    }
+    
+    .filter-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+    }
+    
+    .filter-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+    }
+    
+    .food-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    
+    .food-list::-webkit-scrollbar {
+      width: 12px;
+    }
+    
+    .food-list::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    
+    .food-list::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 6px;
+      border: 2px solid var(--bg-secondary);
+    }
+    
+    .food-list::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-dim);
+    }
+    
+    /* ========================================
+       FOOD ITEM CARDS
+       ======================================== */
+    
+    .food-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--line);
+      transition: all 0.3s ease;
+      position: relative;
+      background: var(--panel);
+    }
+    
+    .food-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    
+    .food-item:hover::before {
+      width: 4px;
+    }
+    
+    .food-item:hover {
+      background: var(--panel-2);
+      transform: translateX(4px);
+    }
+    
+    .food-item:last-child {
+      border-bottom: none;
+    }
+    
+    .food-item.expired {
+      background: rgba(255, 7, 58, 0.1);
+      border-left: 4px solid var(--danger);
+    }
+    
+    .food-item.expiring-soon {
+      background: rgba(255, 107, 53, 0.1);
+      border-left: 4px solid var(--warning);
+    }
+    
+    .food-main {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+    
+    .food-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      font-family: 'Orbitron', monospace;
+      text-shadow: var(--glow);
+    }
+    
+    .food-details {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .expiry-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    
+    .expiry-date {
+      font-size: 12px;
+      color: var(--ink-dim);
+      font-family: 'Orbitron', monospace;
+    }
+    
+    .days-left {
+      font-size: 16px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-family: 'Orbitron', monospace;
+      text-shadow: var(--glow);
+    }
+    
+    .days-left.fresh {
+      background: rgba(57, 255, 20, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    
+    .days-left.expiring-soon {
+      background: rgba(255, 107, 53, 0.2);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+    
+    .days-left.expired {
+      background: rgba(255, 7, 58, 0.2);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    
+    /* ========================================
+       DELETE BUTTON
+       ======================================== */
+    
+    .delete-btn {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--danger);
+      background: var(--danger);
+      color: var(--bg);
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      font-family: 'Orbitron', monospace;
+    }
+    
+    .delete-btn:hover {
+      background: var(--bg);
+      color: var(--danger);
+      box-shadow: 0 0 15px rgba(255, 7, 58, 0.5);
+      transform: scale(1.1);
+    }
+    
+    /* ========================================
+       RESPONSIVE DESIGN
+       ======================================== */
+    
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 0 16px 32px;
+      }
+      
+      .add-form {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      
+      .days-input-group {
+        align-items: stretch;
+      }
+      
+      .days-input {
+        width: 100%;
+      }
+      
+      .header {
+        padding: 16px 20px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .list-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: stretch;
+      }
+      
+      .filter-controls {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+      .food-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        padding: 20px;
+      }
+      
+      .food-main {
+        justify-content: space-between;
+      }
+      
+      .food-details {
+        justify-content: space-between;
+      }
+      
+      .expiry-info {
+        align-items: flex-start;
+      }
+    }
+    
+    /* ========================================
+       ANIMATIONS
+       ======================================== */
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .food-item {
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    /* ========================================
+       STATS DISPLAY
+       ======================================== */
+    
+    .stats-bar {
+      display: flex;
+      gap: 24px;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, var(--panel-2), var(--panel));
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      font-size: 16px;
+      border: 1px solid var(--accent);
+    }
+    
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+    
+    .stat-item::after {
+      content: '';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 20px;
+      background: var(--accent);
+      opacity: 0.3;
+    }
+    
+    .stat-item:last-child::after {
+      display: none;
+    }
+    
+    .stat-number {
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      text-shadow: var(--glow);
+    }
+    
+    .stat-label {
+      color: var(--ink-dim);
+      font-family: 'Orbitron', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* ========================================
+       UTILITY CLASSES
+       ======================================== */
+    
+    .text-center { text-align: center; }
+    .text-muted { color: var(--ink-dim); }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>⚡ PANTRY TRACKER v2.0</h1>
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-number" id="totalItems">0</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="expiringCount">0</span>
+        <span class="stat-label">Expiring</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="expiredCount">0</span>
+        <span class="stat-label">Expired</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- ========================================
+         QUICK ADD SECTION (ALWAYS VISIBLE)
+         ======================================== -->
+    <section class="quick-add">
+      <div class="add-form">
+        <input 
+          id="foodName" 
+          class="food-input" 
+          type="text" 
+          placeholder="ENTER FOOD ITEM (e.g., MILK, BREAD, APPLES)"
+          maxlength="50"
+        />
+        <div class="days-input-group">
+          <label class="days-label">⏰ EXPIRY DAYS</label>
+          <input 
+            id="daysInput" 
+            class="days-input" 
+            type="number"
+            min="1"
+            max="365"
+            placeholder="7"
+            title="How many days until this food expires?"
+          />
+        </div>
+        <button id="addFoodBtn" class="add-btn">ADD</button>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         EXPIRING ALERTS (PROMINENT)
+         ======================================== -->
+    <section class="alerts-section" id="alertsSection" style="display: none;">
+      <div class="alert-header">
+        <h2>⚠️ SYSTEM ALERT</h2>
+      </div>
+      <div class="alerts-list" id="alertsList">
+        <!-- Alert items will be dynamically inserted here -->
+      </div>
+    </section>
+    
+    <!-- ========================================
+         MAIN FOOD LIST
+         ======================================== -->
+    <section class="food-list-section">
+      <div class="list-header">
+        <h2>FOOD INVENTORY</h2>
+        <div class="filter-controls">
+          <button class="filter-btn active" data-filter="all">ALL</button>
+          <button class="filter-btn" data-filter="expired">🗑️ EXPIRED</button>
+          <button class="filter-btn" data-filter="expiring">⚠️ EXPIRING</button>
+          <button class="filter-btn" data-filter="shelf-stable">✅ STABLE</button>
+        </div>
+      </div>
+      
+      <div class="food-list" id="foodList">
+        <!-- Food items will be dynamically inserted here -->
+      </div>
+    </section>
+    
+  </main>
+
+  <script>
+    /* ========================================
+       DOM MANIPULATION UTILITIES
+       ======================================== */
+    
+    const $ = id => document.getElementById(id);
+    
+    const el = (tag, attrs = {}, kids = []) => {
+      const n = document.createElement(tag);
+      
+      for (const k in attrs) {
+        if (k === 'style') {
+          Object.assign(n.style, attrs.style);
+        } else if (k === 'dataset') {
+          Object.assign(n.dataset, attrs.dataset);
+        } else {
+          n[k] = attrs[k];
+        }
+      }
+      
+      kids.forEach(ch => n.appendChild(ch));
+      return n;
+    };
+    
+    const replace = (node, children) => node.replaceChildren(...children);
+
+    /* ========================================
+       APPLICATION STATE
+       ======================================== */
+    
+    const state = {
+      foods: {},                    // Food storage: {id: {name, purchaseDate, expiryDate}}
+      currentFilter: 'all'          // Current filter: 'all', 'expired', 'expiring', 'shelf-stable'
+    };
+    
+    const MIN_VISIBLE_ROWS = 8;
+
+    /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+    
+    const els = {
+      foodName: $('foodName'),
+      daysInput: $('daysInput'),
+      addBtn: $('addFoodBtn'),
+      totalItems: $('totalItems'),
+      expiringCount: $('expiringCount'),
+      expiredCount: $('expiredCount'),
+      alertsSection: $('alertsSection'),
+      alertsList: $('alertsList'),
+      foodList: $('foodList')
+    };
+
+    /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+    
+    const uid = () => 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    
+    /**
+     * Calculates days between two dates
+     * @param {Date} date1 - First date
+     * @param {Date} date2 - Second date
+     * @returns {number} Days difference
+     */
+    const daysBetween = (date1, date2) => {
+      const oneDay = 24 * 60 * 60 * 1000;
+      return Math.round((date2 - date1) / oneDay);
+    };
+    
+    /**
+     * Gets expiry status for a food item
+     * @param {string} expiryDate - Expiry date string
+     * @returns {Object} Status object with type and days
+     */
+    const getExpiryStatus = (expiryDate) => {
+      const today = new Date();
+      const expiry = new Date(expiryDate);
+      const daysLeft = daysBetween(today, expiry);
+      
+      if (daysLeft < 0) {
+        return { type: 'expired', days: Math.abs(daysLeft) };
+      } else if (daysLeft <= 3) {
+        return { type: 'expiring-soon', days: daysLeft };
+      } else {
+        return { type: 'fresh', days: daysLeft };
+      }
+    };
+    
+    /**
+     * Formats date for display
+     * @param {string} dateString - Date string
+     * @returns {string} Formatted date
+     */
+    const formatDate = (dateString) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    };
+
+    /* ========================================
+       FOOD MANAGEMENT FUNCTIONS
+       ======================================== */
+    
+    /**
+     * Adds a new food item
+     */
+    function addFoodItem() {
+      const name = els.foodName.value.trim();
+      const days = parseInt(els.daysInput.value) || 7; // Default to 7 if empty
+      
+      if (!name) {
+        alert('PLEASE ENTER FOOD NAME');
+        return;
+      }
+      
+      if (days < 1) {
+        alert('DAYS MUST BE 1 OR MORE');
+        return;
+      }
+      
+      const today = new Date();
+      const purchaseDate = today.toISOString().split('T')[0];
+      
+      // Calculate expiry date by adding days to today
+      const expiryDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
+      const expiryDateString = expiryDate.toISOString().split('T')[0];
+      
+      const id = uid();
+      
+      state.foods[id] = {
+        name,
+        purchaseDate,
+        expiryDate: expiryDateString
+      };
+      
+      // Clear form
+      els.foodName.value = '';
+      els.daysInput.value = '';
+      
+      // Focus back on food name for quick entry
+      els.foodName.focus();
+      
+      renderAll();
+      saveToStorage();
+    }
+
+    /**
+     * Creates a food chip element
+     * @param {string} id - Food ID
+     * @returns {HTMLElement} Food chip element
+     */
+    const chipFor = id => {
+      const food = state.foods[id];
+      
+      if (!food) {
+        console.warn(`Food with id ${id} not found in state.foods`);
+        return el('span', {
+          className: 'food-chip',
+          textContent: '[FOOD NOT FOUND]'
+        });
+      }
+      
+      const chip = el('span', { 
+        className: `food-chip` 
+      });
+      chip.textContent = food.name;
+      return chip;
+    };
+
+    /**
+     * Deletes a food item
+     * @param {string} id - Food ID to delete
+     */
+    function deleteFoodItem(id) {
+      if (!state.foods[id]) return;
+      
+      delete state.foods[id];
+      renderAll();
+      saveToStorage();
+    }
+    
+    /**
+     * Gets filtered food items based on current filter
+     * @returns {Array} Array of food IDs
+     */
+    function getFilteredFoods() {
+      const allFoods = Object.keys(state.foods);
+      
+      if (state.currentFilter === 'all') {
+        return allFoods;
+      } else if (state.currentFilter === 'expired') {
+        return allFoods.filter(id => {
+          const status = getExpiryStatus(state.foods[id].expiryDate);
+          return status.type === 'expired';
+        });
+      } else if (state.currentFilter === 'expiring') {
+        return allFoods.filter(id => {
+          const status = getExpiryStatus(state.foods[id].expiryDate);
+          return status.type === 'expiring-soon';
+        });
+      } else if (state.currentFilter === 'shelf-stable') {
+        return allFoods.filter(id => {
+          const status = getExpiryStatus(state.foods[id].expiryDate);
+          return status.type === 'fresh' && status.days > 30;
+        });
+      }
+      
+      return allFoods;
+    }
+
+    /* ========================================
+       RENDERING SYSTEM
+       ======================================== */
+    
+    /**
+     * Updates the statistics display
+     */
+    function updateStats() {
+      const totalItems = Object.keys(state.foods).length;
+      let expiringCount = 0;
+      let expiredCount = 0;
+      
+      Object.values(state.foods).forEach(food => {
+        const status = getExpiryStatus(food.expiryDate);
+        if (status.type === 'expiring-soon') {
+          expiringCount++;
+        } else if (status.type === 'expired') {
+          expiredCount++;
+        }
+      });
+      
+      els.totalItems.textContent = totalItems;
+      els.expiringCount.textContent = expiringCount;
+      els.expiredCount.textContent = expiredCount;
+    }
+
+    /**
+     * Re-renders all sections
+     */
+    function renderAll() {
+      updateStats();
+      renderAlerts();
+      renderFoodList();
+    }
+
+    /**
+     * Renders the alerts section
+     */
+    function renderAlerts() {
+      const expiringFoods = Object.keys(state.foods).filter(id => {
+        const status = getExpiryStatus(state.foods[id].expiryDate);
+        return status.type === 'expired' || status.type === 'expiring-soon';
+      });
+      
+      if (expiringFoods.length === 0) {
+        els.alertsSection.style.display = 'none';
+        return;
+      }
+      
+      els.alertsSection.style.display = 'block';
+      
+      const alertItems = expiringFoods.map(id => {
+        const food = state.foods[id];
+        const status = getExpiryStatus(food.expiryDate);
+        
+        const alertItem = el('div', {
+          className: `alert-item ${status.type}`
+        });
+        
+        const alertText = el('div', { className: 'alert-text' });
+        alertText.innerHTML = `
+          <strong>${food.name.toUpperCase()}</strong>
+        `;
+        
+        const alertAction = el('div', {
+          textContent: status.type === 'expired' 
+            ? `EXPIRED ${status.days} DAY${status.days !== 1 ? 'S' : ''} AGO`
+            : `EXPIRES IN ${status.days} DAY${status.days !== 1 ? 'S' : ''}`
+        });
+        
+        alertItem.appendChild(alertText);
+        alertItem.appendChild(alertAction);
+        
+        return alertItem;
+      });
+      
+      replace(els.alertsList, alertItems);
+    }
+
+    /**
+     * Renders the main food list
+     */
+    function renderFoodList() {
+      const filteredIds = getFilteredFoods();
+      
+      // Sort by expiry date (soonest first)
+      filteredIds.sort((a, b) => {
+        const dateA = new Date(state.foods[a].expiryDate);
+        const dateB = new Date(state.foods[b].expiryDate);
+        return dateA - dateB;
+      });
+      
+      const foodItems = filteredIds.map(id => {
+        const food = state.foods[id];
+        const status = getExpiryStatus(food.expiryDate);
+        
+        const foodItem = el('div', {
+          className: `food-item ${status.type}`
+        });
+        
+        const foodMain = el('div', { className: 'food-main' });
+        foodMain.innerHTML = `
+          <span class="food-name">${food.name.toUpperCase()}</span>
+        `;
+        
+        const foodDetails = el('div', { className: 'food-details' });
+        foodDetails.innerHTML = `
+          <div class="expiry-info">
+            <span class="expiry-date">EXPIRES ${formatDate(food.expiryDate).toUpperCase()}</span>
+            <span class="days-left ${status.type}">
+              ${status.type === 'expired' ? `-${status.days}D` : `${status.days}D LEFT`}
+            </span>
+          </div>
+          <button class="delete-btn" title="DELETE ITEM">×</button>
+        `;
+        
+        const deleteBtn = foodDetails.querySelector('.delete-btn');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteFoodItem(id);
+        });
+        
+        foodItem.appendChild(foodMain);
+        foodItem.appendChild(foodDetails);
+        
+        return foodItem;
+      });
+      
+      replace(els.foodList, foodItems);
+    }
+
+    /* ========================================
+       FILTER SYSTEM
+       ======================================== */
+    
+    function setFilter(filter) {
+      state.currentFilter = filter;
+      
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+      
+      renderFoodList();
+    }
+
+    /* ========================================
+       LOCAL STORAGE
+       ======================================== */
+    
+    function saveToStorage() {
+      localStorage.setItem('pantry-tracker-neon-data', JSON.stringify(state));
+    }
+    
+    function loadFromStorage() {
+      const saved = localStorage.getItem('pantry-tracker-neon-data');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        state.foods = parsed.foods || {};
+        state.currentFilter = parsed.currentFilter || 'all';
+      } else {
+        // Add some sample data for first-time users
+        addSampleData();
+      }
+    }
+    
+    function addSampleData() {
+      const today = new Date();
+      const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+      const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const nextMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+      
+      const sampleFoods = [
+        { name: 'ENERGY DRINK', purchaseDate: today.toISOString().split('T')[0], expiryDate: tomorrow.toISOString().split('T')[0] },
+        { name: 'PROTEIN BARS', purchaseDate: today.toISOString().split('T')[0], expiryDate: nextWeek.toISOString().split('T')[0] },
+        { name: 'SYNTHETIC FRUIT', purchaseDate: today.toISOString().split('T')[0], expiryDate: nextWeek.toISOString().split('T')[0] },
+        { name: 'NUTRIENT PASTE', purchaseDate: today.toISOString().split('T')[0], expiryDate: nextMonth.toISOString().split('T')[0] },
+        { name: 'BIO YOGURT', purchaseDate: today.toISOString().split('T')[0], expiryDate: tomorrow.toISOString().split('T')[0] }
+      ];
+      
+      sampleFoods.forEach(food => {
+        const id = uid();
+        state.foods[id] = food;
+      });
+      
+      saveToStorage();
+    }
+
+    /* ========================================
+       INPUT HANDLING
+       ======================================== */
+    
+    els.addBtn.addEventListener('click', addFoodItem);
+    
+    // Add food on Enter key
+    [els.foodName, els.daysInput].forEach(input => {
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          addFoodItem();
+        }
+      });
+    });
+    
+    // Set default days value
+    els.daysInput.value = '7';
+    
+    // Filter button handlers
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setFilter(btn.dataset.filter);
+      });
+    });
+
+    /* ========================================
+       APPLICATION INITIALIZATION
+       ======================================== */
+    
+    function init() {
+      loadFromStorage();
+      renderAll();
+      
+      // Set initial filter
+      setFilter(state.currentFilter);
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+  </script>
+</body>
+</html>

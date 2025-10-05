@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verbal Memory Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #111622;
+      box-sizing: border-box;
+      overflow: hidden;
+      font-family: 'Rubik', sans-serif;
+    }
+    body {
+      min-height: 100dvh;
+      width: 100vw;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      font-family: 'Rubik', sans-serif;
+    }
+    .container {
+      width: 100vw;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      overflow: auto;
+    }
+    .status-bar {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2vw;
+      padding: 0.7em 2vw 0.2em 2vw;
+      background: rgba(17,22,34, 0.92);
+      min-height: 40px;
+      font-family: 'Rubik', sans-serif;
+      color: #bac2de;
+      user-select: none;
+      flex: 0 0 auto;
+    }
+    .status-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      font-size: 1.55rem;
+    }
+    .status-label {
+      font-size: 1em;
+      opacity: 0.76;
+      margin-right: 0.16em;
+      font-weight: 500;
+    }
+    .strike-x {
+      font-size: 2.1em;
+      margin-right: 0.1em;
+      color: #3a3f54;
+      transition: color 0.15s;
+      filter: drop-shadow(0 1px 0 #11162260);
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .strike-x.active {
+      color: #e34a59;
+      text-shadow: 0 1px 0 #72132180;
+    }
+    .game-area {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 0;
+      min-width: 0;
+    }
+    .grid {
+      display: grid;
+      background: none;
+      margin: 0;
+      box-sizing: border-box;
+      transition: width 0.13s, height 0.13s;
+    }
+    .tile {
+      background: #181f2c;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Rubik', sans-serif;
+      font-size: 1.6rem;
+      color: #8ca3d3;
+      user-select: none;
+      transition: transform 0.13s;
+      position: relative;
+    }
+    .tile:hover {
+      filter: brightness(1.35);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    }
+.tile-word-text {
+  white-space: nowrap;
+}
+    /* Overlay styles */
+    .start-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      background: rgba(0,0,0,0.68);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.18s;
+      font-family: 'Rubik', sans-serif;
+      pointer-events: auto;
+      opacity: 1;
+    }
+
+    .start-overlay.hide {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+    }
+    .start-instructions {
+      color: #e0e6f6;
+      font-size: 2.1rem;
+      text-align: center;
+      text-shadow: 0 2px 10px #111622ee;
+      white-space: pre-line;
+      line-height: 1.35;
+      padding: 1.1em 1.4em 1em 1.4em;
+      border-radius: 1.2em;
+      background: rgba(27, 36, 52, 0.17);
+      box-shadow: 0 2px 26px 2px #111622bb;
+      max-width: 90vw;
+      font-weight: 500;
+    }
+    @media (max-width: 600px), (max-height: 600px) {
+      .status-bar {
+        font-size: 1.1rem;
+        padding: 0.5em 1vw 0.1em 1vw;
+      }
+      .status-item {
+        font-size: 1.1rem;
+      }
+      .strike-x {
+        font-size: 1.4em;
+      }
+      .tile {
+        font-size: 1rem;
+      }
+      .start-instructions {
+        font-size: 1.1rem;
+        padding: 0.8em 0.4em 0.7em 0.4em;
+      }
+  .tile-word-text {
+    font-size: 1.12rem !important;  /* Or whatever looks good to you */
+    max-width: 88%;
+    max-height: 78%;
+  }
+    }
+
+.start-overlay,
+.start-instructions {
+  user-select: none;
+  -webkit-user-select: none; /* iOS/Safari */
+  -ms-user-select: none;     /* IE10+ */
+}
+
+/* --- Feedback Animation --- */
+.tile-feedback {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.01em;
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0.92;
+  user-select: none;
+  transition: none;
+  animation: tileFeedbackAnim 0.7s cubic-bezier(.4,.2,.58,1) forwards;
+  /* Subtle shadow for visibility */
+  text-shadow: 0 2px 6px #0008;
+}
+
+.tile-feedback.green { color: #3bc157; }
+.tile-feedback.red   { color: #e03b45; }
+
+@keyframes tileFeedbackAnim {
+  from {
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  70% {
+    opacity: 0.95;
+    transform: translate(-50%, -90%) scale(1.09);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -130%) scale(1.12);
+  }
+}
+
+
+
+@keyframes fontGlowPulse {
+  0%   { text-shadow: none; }
+  20%  { text-shadow: 0 0 10px #fffbe9cc, 0 2px 10px #bfd7ff99; }
+  70%  { text-shadow: 0 0 6px #eef7ff88, 0 2px 7px #e6efff77; }
+  100% { text-shadow: none; }
+}
+.glow {
+  animation: fontGlowPulse 0.54s cubic-bezier(.7,.2,.7,1);
+}
+
+
+
+.start-overlay:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="status-bar">
+      <div class="status-item" id="score"><span class="status-label">Score:</span><span>0</span></div>
+      <div class="status-item" id="round"><span class="status-label">Round:</span><span>1</span></div>
+      <div class="status-item" id="timer"><span>1:00</span></div>
+      <div class="status-item" id="strikes">
+        <span class="strike-x" id="strike1">&#10006;</span>
+        <span class="strike-x" id="strike2">&#10006;</span>
+        <span class="strike-x" id="strike3">&#10006;</span>
+      </div>
+    </div>
+    <div class="game-area">
+  <div class="grid" id="grid"></div>
+  <!-- Start overlay -->
+  <div class="start-overlay" id="startOverlay" tabindex="0" style="display:none;">
+    <div class="start-instructions" id="startInstructions"></div>
+  </div>
+  <!-- Game Over overlay -->
+  <div class="start-overlay" id="gameOverOverlay" tabindex="0" style="display:none;">
+    <div class="start-instructions" id="gameOverInstructions"></div>
+  </div>
+</div>
+
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

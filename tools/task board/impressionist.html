@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Impressionist Task Board Application
+    A soft, Monet-inspired task management system with flowing brush strokes,
+    pastel colors, and gentle animations that evoke water lilies and gardens.
+  -->
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Garden of Tasks</title>
+  
+  <!-- Google Fonts: Playfair Display for elegant serif, and Crimson Text for flowing text -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       IMPRESSIONIST DESIGN SYSTEM
+       ======================================== */
+    
+    :root {
+      /* === IMPRESSIONIST COLOR PALETTE === */
+      --bg: #f8f6f0;           /* Warm cream background */
+      --panel: #ffffff;        /* Soft white panels */
+      --panel-2: #f5f3ed;      /* Warm off-white for depth */
+      --ink: #4a4a4a;          /* Soft charcoal text */
+      --ink-dim: #8a8a8a;      /* Muted gray text */
+      --line: #e8e0d0;         /* Warm beige borders */
+      
+      /* === IMPRESSIONIST ACCENTS === */
+      --accent: #d4a574;       /* Warm gold */
+      --accent-dim: #b8956a;   /* Deeper gold */
+      --lavender: #c8a8e9;     /* Soft lavender */
+      --sage: #a8c8a8;         /* Sage green */
+      --rose: #e8a8c8;         /* Dusty rose */
+      --sky: #a8c8e8;          /* Sky blue */
+      
+      /* === LAYOUT DIMENSIONS === */
+      --row-h: 50px;           /* Generous row height */
+      --head-h: 60px;          /* Spacious headers */
+      
+      /* === IMPRESSIONIST EFFECTS === */
+      --radius: 16px;          /* Soft rounded corners */
+      --shadow: 0 8px 32px rgba(212,165,116,.15);  /* Warm shadow */
+    }
+    
+    /* ========================================
+       GLOBAL RESET & IMPRESSIONIST BASE
+       ======================================== */
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      /* Impressionist background with soft gradients */
+      background: 
+        radial-gradient(1200px 800px at 20% -10%, rgba(212,165,116,.08), transparent 50%),
+        radial-gradient(1000px 600px at 80% 20%, rgba(200,168,233,.06), transparent 45%),
+        radial-gradient(800px 500px at 50% 80%, rgba(168,200,168,.05), transparent 40%),
+        linear-gradient(135deg, var(--bg) 0%, #f5f3ed 50%, var(--bg) 100%);
+      color: var(--ink);
+      font-family: 'Crimson Text', serif;
+      letter-spacing: .02em;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    
+    /* Flowing brush stroke overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse at 30% 20%, rgba(212,165,116,.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(200,168,233,.02) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 80%, rgba(168,200,168,.02) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+      animation: gentleFlow 25s ease-in-out infinite;
+    }
+    
+    @keyframes gentleFlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-5px) rotate(0.5deg); }
+      50% { transform: translateY(2px) rotate(-0.3deg); }
+      75% { transform: translateY(-3px) rotate(0.2deg); }
+    }
+    
+    /* ========================================
+       IMPRESSIONIST TOP BAR
+       ======================================== */
+    
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px 28px 20px;
+      border-bottom: 2px solid rgba(212,165,116,.2);
+      background: rgba(255,255,255,.8);
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+    
+    .topbar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: flowingAccent 4s ease-in-out infinite;
+    }
+    
+    @keyframes flowingAccent {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+    
+    .topbar .label {
+      color: var(--ink-dim);
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 500;
+      opacity: .8;
+      user-select: none;
+      white-space: nowrap;
+      font-style: italic;
+    }
+    
+    /* ========================================
+       IMPRESSIONIST INPUT COMPONENTS
+       ======================================== */
+    
+    .task-input {
+      width: 26ch;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--accent);
+      caret-color: var(--accent);
+      font: 500 17px 'Crimson Text', serif;
+      padding: 10px 12px 8px;
+      border-bottom: 2px solid transparent;
+      transition: all .3s ease;
+    }
+    
+    .task-input::placeholder {
+      color: rgba(138,138,138,.6);
+      font-style: italic;
+    }
+    
+    .task-input:focus {
+      border-bottom-color: var(--accent);
+      box-shadow: 0 4px 0 -2px rgba(212,165,116,.3);
+      transform: translateY(-1px);
+    }
+    
+    .hint {
+      font-size: 13px;
+      color: var(--ink-dim);
+      margin-left: 8px;
+      font-family: 'Crimson Text', serif;
+      font-style: italic;
+    }
+    
+    /* ========================================
+       IMPRESSIONIST BOARD LAYOUT
+       ======================================== */
+    
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 24px;
+      padding: 28px 32px 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .board .list-card:last-child {
+      grid-column: 1/-1;
+    }
+    
+    /* ========================================
+       IMPRESSIONIST LIST CARDS
+       ======================================== */
+    
+    .list-card {
+      /* Impressionist layered gradients with soft brush effects */
+      background: 
+        linear-gradient(135deg, rgba(212,165,116,.05), transparent 30%),
+        linear-gradient(45deg, rgba(200,168,233,.03), transparent 25%),
+        linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 
+        var(--shadow),
+        inset 0 0 30px rgba(212,165,116,.05);
+      padding: 20px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+      transition: all .4s ease;
+    }
+    
+    .list-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 12px 40px rgba(212,165,116,.2),
+        inset 0 0 30px rgba(212,165,116,.08);
+    }
+    
+    .list-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--accent), var(--lavender), var(--sage), var(--rose));
+      border-radius: var(--radius);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .4s ease;
+    }
+    
+    .list-card:hover::before {
+      opacity: .2;
+    }
+    
+    .list-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font: 600 20px 'Playfair Display', serif;
+      letter-spacing: .02em;
+      margin: 4px 8px 16px;
+      color: var(--ink);
+      position: relative;
+    }
+    
+    .list-title .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-dim));
+      box-shadow: 
+        0 0 15px rgba(212,165,116,.6),
+        0 0 30px rgba(212,165,116,.3);
+      animation: softPulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes softPulse {
+      0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(212,165,116,.6), 0 0 30px rgba(212,165,116,.3);
+      }
+      50% { 
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(212,165,116,.8), 0 0 40px rgba(212,165,116,.4);
+      }
+    }
+    
+    /* ========================================
+       IMPRESSIONIST TABLE CONTAINER
+       ======================================== */
+    
+    .table-wrap {
+      height: calc(var(--head-h) + var(--row-h) * 8);
+      overflow: auto;
+      border-radius: 12px;
+      border: 2px solid var(--line);
+      position: relative;
+      background: 
+        linear-gradient(180deg, rgba(255,255,255,.8), rgba(245,243,237,.6));
+      backdrop-filter: blur(5px);
+    }
+    
+    .table-wrap::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: linear-gradient(45deg, var(--accent), var(--lavender));
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(212,165,116,.3);
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(45deg, var(--lavender), var(--sage));
+    }
+    
+    /* ========================================
+       IMPRESSIONIST TABLE STRUCTURE
+       ======================================== */
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 16px;
+    }
+    
+    thead th {
+      position: sticky;
+      top: 0;
+      text-align: left;
+      font-weight: 600;
+      height: var(--head-h);
+      padding: 12px 20px;
+      background: rgba(255,255,255,.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid rgba(212,165,116,.2);
+      z-index: 2;
+      font-family: 'Playfair Display', serif;
+      color: var(--ink);
+    }
+    
+    tbody td {
+      height: var(--row-h);
+      padding: 10px 20px;
+      vertical-align: middle;
+      border-bottom: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    
+    /* ========================================
+       IMPRESSIONIST TASK ROWS
+       ======================================== */
+    
+    .task-row {
+      cursor: grab;
+      transition: all .3s ease;
+      position: relative;
+    }
+    
+    .task-row:hover {
+      background: rgba(212,165,116,.08);
+      transform: translateX(4px);
+    }
+    
+    .task-row:active {
+      cursor: grabbing;
+      transform: scale(1.02) rotate(0.5deg);
+    }
+    
+    /* ========================================
+       IMPRESSIONIST TASK CHIPS
+       ======================================== */
+    
+    .task-chip {
+      display: inline-block;
+      padding: 10px 18px;
+      border-radius: 25px;
+      background: 
+        linear-gradient(135deg, rgba(255,255,255,.9), rgba(245,243,237,.8));
+      border: 2px solid rgba(212,165,116,.3);
+      color: var(--ink);
+      font-weight: 500;
+      letter-spacing: .02em;
+      box-shadow: 
+        0 4px 15px rgba(212,165,116,.2) inset,
+        0 2px 8px rgba(0,0,0,.05);
+      transition: all .3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .task-chip::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+      transition: left .6s ease;
+    }
+    
+    .task-chip:hover::before {
+      left: 100%;
+    }
+    
+    .task-chip:hover {
+      transform: translateY(-2px) rotate(1deg);
+      box-shadow: 
+        0 6px 20px rgba(212,165,116,.3) inset,
+        0 4px 12px rgba(0,0,0,.1);
+      border-color: var(--accent);
+    }
+    
+    /* ========================================
+       IMPRESSIONIST DRAG & DROP STATES
+       ======================================== */
+    
+    .dragging {
+      opacity: .7;
+      filter: hue-rotate(20deg) saturate(1.2);
+      transform: rotate(2deg) scale(1.05);
+    }
+    
+    .empty-row td {
+      color: rgba(138,138,138,.4);
+      border-bottom: none;
+      position: relative;
+    }
+    
+    .empty-row:hover td {
+      background: rgba(212,165,116,.05);
+    }
+    
+    .table-wrap.dropzone {
+      border-color: var(--accent) !important;
+      box-shadow: 
+        0 0 25px rgba(212,165,116,.4),
+        inset 0 0 20px rgba(212,165,116,.1);
+      animation: softGlow 1.5s ease-in-out infinite alternate;
+    }
+    
+    @keyframes softGlow {
+      0% { 
+        box-shadow: 0 0 25px rgba(212,165,116,.4), inset 0 0 20px rgba(212,165,116,.1);
+      }
+      100% { 
+        box-shadow: 0 0 35px rgba(212,165,116,.6), inset 0 0 30px rgba(212,165,116,.15);
+      }
+    }
+    
+    /* ========================================
+       IMPRESSIONIST HEADER INPUT
+       ======================================== */
+    
+    thead th .task-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--ink);
+      font: 500 17px 'Crimson Text', serif;
+      padding: 12px 20px;
+      text-align: left;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    thead th .task-input::placeholder {
+      color: var(--ink-dim);
+      opacity: .6;
+      font-style: italic;
+    }
+    
+    /* ========================================
+       IMPRESSIONIST TASK BANK LAYOUT
+       ======================================== */
+    
+    .bank-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      padding: 0 12px 12px;
+    }
+    
+    /* ========================================
+       IMPRESSIONIST TIMER ANIMATIONS
+       ======================================== */
+    
+    .timer-done {
+      color: var(--accent);
+      animation: softBlink 2s ease-in-out infinite;
+      font-weight: 600;
+    }
+    
+    @keyframes softBlink {
+      0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 0.6;
+        transform: scale(1.05);
+      }
+    }
+    
+    /* ========================================
+       IMPRESSIONIST FLOATING ELEMENTS
+       ======================================== */
+    
+    .floating-element {
+      position: absolute;
+      pointer-events: none;
+      opacity: .15;
+      animation: gentleFloat 20s ease-in-out infinite;
+    }
+    
+    @keyframes gentleFloat {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(50px, -30px) rotate(90deg); }
+      50% { transform: translate(30px, 50px) rotate(180deg); }
+      75% { transform: translate(-30px, 30px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+    
+    /* ========================================
+       IMPRESSIONIST RESPONSIVE DESIGN
+       ======================================== */
+    
+    @media (max-width: 768px) {
+      .board {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px 24px 24px;
+      }
+      
+      .board .list-card:last-child {
+        grid-column: 1;
+      }
+      
+      .bank-columns {
+        grid-template-columns: 1fr;
+      }
+      
+      .topbar {
+        padding: 20px 24px 16px;
+      }
+      
+      .list-card {
+        padding: 16px 20px 20px;
+      }
+    }
+    
+    /* ========================================
+       IMPRESSIONIST ANIMATIONS
+       ======================================== */
+    
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+    
+    .list-card {
+      animation: fadeInUp .6s ease-out;
+    }
+    
+    .task-row {
+      animation: fadeInUp .4s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Impressionist floating elements -->
+  <div class="floating-element" style="top: 15%; left: 10%; font-size: 28px;">🌸</div>
+  <div class="floating-element" style="top: 25%; right: 15%; font-size: 24px;">🦋</div>
+  <div class="floating-element" style="bottom: 35%; left: 20%; font-size: 22px;">🌿</div>
+  <div class="floating-element" style="top: 65%; right: 10%; font-size: 26px;">🌺</div>
+  <div class="floating-element" style="top: 45%; left: 5%; font-size: 20px;">🍃</div>
+  
+  <main class="board">
+    
+    <!-- ========================================
+         IMPRESSIONIST CURRENT FOCUS SECTION
+         ======================================== -->
+    <section class="list-card" data-list="now">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Garden Focus
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:90px">Time</th>
+              <th>Blossom</th>
+            </tr>
+          </thead>
+          <tbody id="now-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         IMPRESSIONIST NEEDS DOING SECTION
+         ======================================== -->
+    <section class="list-card" data-list="soon">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Budding Dreams
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:90px">Planted</th>
+              <th>Seedling</th>
+            </tr>
+          </thead>
+          <tbody id="soon-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         IMPRESSIONIST TASK BANK SECTION
+         ======================================== -->
+    <section class="list-card" data-list="bank">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Garden Collection
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th colspan="3">
+                <input 
+                  id="newTask" 
+                  class="task-input" 
+                  type="text" 
+                  maxlength="120" 
+                  placeholder="Plant a new seed..." 
+                  autocomplete="off" 
+                />
+              </th>
+            </tr>
+          </thead>
+        </table>
+        
+        <div class="bank-columns">
+          <table class="task-table">
+            <tbody id="bank-col1-body">
+              <!-- Column 1 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col2-body">
+              <!-- Column 2 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col3-body">
+              <!-- Column 3 tasks -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  <script>
+    /* ========================================
+       DOM MANIPULATION UTILITIES
+       ======================================== */
+    
+    const $ = id => document.getElementById(id);
+    
+    const el = (tag, attrs = {}, kids = []) => {
+      const n = document.createElement(tag);
+      
+      for (const k in attrs) {
+        if (k === 'style') {
+          Object.assign(n.style, attrs.style);
+        } else if (k === 'dataset') {
+          Object.assign(n.dataset, attrs.dataset);
+        } else {
+          n[k] = attrs[k];
+        }
+      }
+      
+      kids.forEach(ch => n.appendChild(ch));
+      return n;
+    };
+    
+    const replace = (node, children) => node.replaceChildren(...children);
+
+    /* ========================================
+       IMPRESSIONIST COLOR SYSTEM
+       ======================================== */
+    
+    const COLORS = [
+      '#d4a574',  // Warm gold
+      '#c8a8e9',  // Soft lavender
+      '#a8c8a8',  // Sage green
+      '#e8a8c8',  // Dusty rose
+      '#a8c8e8',  // Sky blue
+      '#b8956a'   // Deeper gold
+    ];
+    
+    const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    /* ========================================
+       APPLICATION STATE
+       ======================================== */
+    
+    const state = {
+      tasks: {},
+      lists: {
+        now: [],
+        soon: [],
+        bank: []
+      }
+    };
+    
+    const MIN_VISIBLE_ROWS = 8;
+
+    /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+    
+    const els = {
+      input: $('newTask'),
+      bodies: {
+        now: $('now-body'),
+        soon: $('soon-body'),
+        bankCol1: $('bank-col1-body'),
+        bankCol2: $('bank-col2-body'),
+        bankCol3: $('bank-col3-body')
+      }
+    };
+
+    /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+    
+    const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    /* ========================================
+       TASK MANAGEMENT FUNCTIONS
+       ======================================== */
+    
+    function addTaskToBank(text) {
+      const id = uid();
+      
+      state.tasks[id] = {
+        text: text.trim(),
+        textColor: randomColor()
+      };
+      
+      state.lists.bank.push(id);
+      renderAll();
+    }
+
+    const chipFor = id => {
+      const t = state.tasks[id];
+      
+      if (!t) {
+        console.warn(`Task with id ${id} not found in state.tasks`);
+        return el('span', {
+          className: 'task-chip',
+          textContent: '[Seed lost...]'
+        });
+      }
+      
+      const s = el('span', { className: 'task-chip' });
+      s.textContent = t.text;
+      s.style.color = t.textColor || '#4a4a4a';
+      return s;
+    };
+
+    /* ========================================
+       TIME FORMATTING UTILITIES
+       ======================================== */
+    
+    const sameDay = (a, b) => 
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+    
+    const formatSoon = ms => {
+      const d = new Date(ms);
+      const now = new Date();
+      
+      return sameDay(d, now) 
+        ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+        : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    };
+
+    /* ========================================
+       RENDERING SYSTEM
+       ======================================== */
+    
+    function renderAll() {
+      renderList('now');
+      renderList('soon');
+      renderBank();
+    }
+
+    function renderList(listId) {
+      const body = els.bodies[listId];
+      const ids = state.lists[listId];
+      
+      const rows = ids.map((id, index) => {
+        if (!state.tasks[id]) {
+          console.warn(`Task with id ${id} not found in state.tasks`);
+          return null;
+        }
+        
+        const tdA = el('td');
+        
+        if (listId === 'soon') {
+          const ts = state.tasks[id].addedSoonAt;
+          tdA.textContent = ts ? formatSoon(ts) : '—';
+        }
+        
+        if (listId === 'now') {
+          const end = state.tasks[id].nowEndAt;
+          if (end) {
+            const rem = end - Date.now();
+            if (rem <= 0) {
+              tdA.textContent = '∞';
+              tdA.classList.add('timer-done');
+            } else {
+              tdA.textContent = formatMMSS(rem);
+              tdA.classList.remove('timer-done');
+            }
+          } else {
+            tdA.textContent = '';
+          }
+        }
+        
+        const tr = el('tr', {
+          className: 'task-row',
+          draggable: true,
+          dataset: { taskId: id, listId, index }
+        }, [
+          tdA,
+          el('td', {}, [chipFor(id)])
+        ]);
+        
+        attachRowDnD(tr);
+        return tr;
+      }).filter(row => row !== null);
+      
+      const placeholders = Math.max(MIN_VISIBLE_ROWS - ids.length, 0);
+      for (let i = 0; i < placeholders; i++) {
+        const ph = el('tr', {
+          className: 'empty-row',
+          dataset: { listId }
+        }, [el('td'), el('td')]);
+        attachDropToRow(ph);
+        rows.push(ph);
+      }
+      
+      attachDropToTbody(body);
+      replace(body, rows);
+    }
+
+    function renderBank() {
+      const ids = state.lists.bank;
+      const columns = [[], [], []];
+      
+      ids.forEach((id, i) => columns[i % 3].push(id));
+      
+      const paint = (bodyEl, colIds, colIndex) => {
+        const nodes = colIds.map((id, i) => {
+          const index = colIndex + i * 3;
+          
+          const tr = el('tr', {
+            className: 'task-row',
+            draggable: true,
+            dataset: { taskId: id, listId: 'bank', index }
+          }, [
+            el('td', {}, [chipFor(id)])
+          ]);
+          
+          attachRowDnD(tr);
+          return tr;
+        });
+        
+        const placeholders = Math.max(MIN_VISIBLE_ROWS - colIds.length, 0);
+        for (let i = 0; i < placeholders; i++) {
+          const ph = el('tr', {
+            className: 'empty-row',
+            dataset: { listId: 'bank' }
+          }, [el('td')]);
+          attachDropToRow(ph);
+          nodes.push(ph);
+        }
+        
+        attachDropToTbody(bodyEl);
+        replace(bodyEl, nodes);
+      };
+      
+      paint(els.bodies.bankCol1, columns[0], 0);
+      paint(els.bodies.bankCol2, columns[1], 1);
+      paint(els.bodies.bankCol3, columns[2], 2);
+    }
+
+    /* ========================================
+       DRAG & DROP SYSTEM
+       ======================================== */
+    
+    let dragData = null;
+    
+    const getList = id => 
+      id ? (id.startsWith('bank-') ? 'bank' : id.replace('-body', '')) : null;
+    
+    function bankDropIndexFromRow(tr) {
+      const tbodyId = tr.closest('tbody').id;
+      const colMatch = tbodyId.match(/bank-col(\d+)-body/);
+      
+      if (!colMatch) return 0;
+      
+      const colIndex = parseInt(colMatch[1]) - 1;
+      let realIndex = 0;
+      
+      for (const c of tr.parentElement.children) {
+        if (c === tr) break;
+        if (c.classList.contains('task-row')) realIndex++;
+      }
+      
+      return colIndex + realIndex * 3;
+    }
+    
+    const clearDnD = () => {
+      document.querySelectorAll('.table-wrap').forEach(tw => 
+        tw.classList.remove('dropzone')
+      );
+      document.querySelectorAll('tr.drop-before').forEach(el => 
+        el.classList.remove('drop-before')
+      );
+    };
+
+    function attachRowDnD(tr) {
+      tr.addEventListener('dragstart', e => {
+        const { taskId, listId, index } = tr.dataset;
+        dragData = { taskId, fromList: listId, fromIndex: Number(index) };
+        tr.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', taskId);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      
+      tr.addEventListener('dragend', () => {
+        tr.classList.remove('dragging');
+        clearDnD();
+        dragData = null;
+      });
+      
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        document.querySelectorAll('tr.drop-before').forEach(el => 
+          el.classList.remove('drop-before')
+        );
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const tbody = tr.closest('tbody');
+        const toList = getList(tbody.id);
+        const beforeIndex = (toList === 'bank') 
+          ? bankDropIndexFromRow(tr) 
+          : Array.from(tr.parentElement.children).indexOf(tr);
+        
+        moveTask(dragData.taskId, dragData.fromList, toList, beforeIndex);
+        dragData = null;
+      });
+    }
+
+    function attachDropToRow(tr) {
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(tr.closest('tbody').id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function attachDropToTbody(tbody) {
+      if (tbody.dataset.bound === '1') return;
+      tbody.dataset.bound = '1';
+      
+      tbody.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tbody.closest('.table-wrap').classList.add('dropzone');
+      });
+      
+      tbody.addEventListener('dragleave', () => 
+        tbody.closest('.table-wrap').classList.remove('dropzone')
+      );
+      
+      tbody.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(e.currentTarget.id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function moveTask(taskId, fromList, toList, beforeIndex) {
+      clearDnD();
+      if (!taskId || !fromList || !toList) return;
+      
+      if (!state.tasks[taskId]) {
+        console.warn(`Cannot move task with id ${taskId} - task not found in state.tasks`);
+        return;
+      }
+      
+      const fromArr = state.lists[fromList];
+      const i = fromArr.indexOf(taskId);
+      if (i > -1) fromArr.splice(i, 1);
+      
+      const toArr = state.lists[toList];
+      
+      if (toList === 'soon' && !state.tasks[taskId].addedSoonAt) {
+        state.tasks[taskId].addedSoonAt = Date.now();
+      }
+      
+      if (toList === 'now') {
+        state.tasks[taskId].nowEndAt = Date.now() + 30 * 60 * 1000;
+        ensureNowInterval();
+      }
+      
+      const dest = Number.isFinite(beforeIndex) 
+        ? Math.min(Math.max(0, beforeIndex), toArr.length) 
+        : toArr.length;
+      
+      if (!toArr.includes(taskId)) {
+        toArr.splice(dest, 0, taskId);
+      }
+      
+      renderAll();
+    }
+
+    /* ========================================
+       TIMER SYSTEM FOR "NOW" TASKS
+       ======================================== */
+    
+    let nowInterval = null;
+    
+    function ensureNowInterval() {
+      if (!nowInterval) {
+        nowInterval = setInterval(() => {
+          if (state.lists.now.length) {
+            renderList('now');
+          } else {
+            clearInterval(nowInterval);
+            nowInterval = null;
+          }
+        }, 1000);
+      }
+    }
+    
+    function clearNowInterval() {
+      if (nowInterval) {
+        clearInterval(nowInterval);
+        nowInterval = null;
+      }
+    }
+    
+    window.addEventListener('beforeunload', clearNowInterval);
+    
+    const pad = n => String(n).padStart(2, '0');
+    
+    function formatMMSS(ms) {
+      const sec = Math.ceil(ms / 1000);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${pad(m)}:${pad(s)}`;
+    }
+
+    /* ========================================
+       INPUT HANDLING
+       ======================================== */
+    
+    els.input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const v = els.input.value.trim();
+        if (v) {
+          addTaskToBank(v);
+          els.input.value = '';
+        }
+      }
+    });
+
+    /* ========================================
+       APPLICATION INITIALIZATION
+       ======================================== */
+    
+    function init() {
+      renderAll();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+  </script>
+</body>
+</html>

@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Surrealist Task Board Application
+    A dreamlike, Dali-inspired task management system with melting elements,
+    impossible geometries, and surreal visual effects.
+  -->
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Surrealist Task Dreams</title>
+  
+  <!-- Google Fonts: Playfair Display for elegant serif, and Dancing Script for flowing text -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Dancing+Script:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       SURREALIST DESIGN SYSTEM
+       ======================================== */
+    
+    :root {
+      /* === SURREALIST COLOR PALETTE === */
+      --bg: #1a0f1a;           /* Deep purple-black background */
+      --panel: #2d1b2d;        /* Rich burgundy panels */
+      --panel-2: #1f141f;      /* Darker burgundy for depth */
+      --ink: #f0e6f0;          /* Soft lavender text */
+      --ink-dim: #b8a8b8;      /* Muted lavender */
+      --line: #4a2d4a;         /* Purple borders */
+      
+      /* === SURREALIST ACCENTS === */
+      --accent: #ff6b9d;       /* Dreamy pink */
+      --accent-dim: #d44a7a;   /* Deeper pink */
+      --gold: #ffd700;         /* Surreal gold */
+      --melt: #ff8c42;         /* Melting orange */
+      
+      /* === LAYOUT DIMENSIONS === */
+      --row-h: 40px;           /* Taller rows for dreamy feel */
+      --head-h: 45px;          /* Larger headers */
+      
+      /* === SURREALIST EFFECTS === */
+      --radius: 20px;          /* More rounded corners */
+      --shadow: 0 8px 32px rgba(255,107,157,.3);  /* Pink glow */
+    }
+    
+    /* ========================================
+       GLOBAL RESET & SURREALIST BASE
+       ======================================== */
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      /* Surrealist background with multiple dreamy gradients */
+      background: 
+        radial-gradient(1500px 800px at 20% -15%, rgba(255,107,157,.08), transparent 50%),
+        radial-gradient(1200px 600px at 80% 10%, rgba(255,212,0,.06), transparent 45%),
+        radial-gradient(1000px 500px at 50% 90%, rgba(255,140,66,.05), transparent 40%),
+        linear-gradient(45deg, var(--bg) 0%, #2d1b2d 50%, var(--bg) 100%);
+      color: var(--ink);
+      font-family: 'Playfair Display', serif;
+      letter-spacing: .3px;
+      overflow-x: hidden;
+    }
+    
+    /* Surrealist floating elements */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(255,107,157,.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255,212,0,.02) 0%, transparent 50%),
+        radial-gradient(circle at 50% 20%, rgba(255,140,66,.02) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+      animation: dreamFloat 20s ease-in-out infinite;
+    }
+    
+    @keyframes dreamFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33% { transform: translateY(-10px) rotate(1deg); }
+      66% { transform: translateY(5px) rotate(-1deg); }
+    }
+    
+    /* ========================================
+       SURREALIST TOP BAR
+       ======================================== */
+    
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px 25px 15px;
+      border-bottom: 2px solid rgba(255,107,157,.2);
+      position: relative;
+    }
+    
+    .topbar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: flowingLine 3s ease-in-out infinite;
+    }
+    
+    @keyframes flowingLine {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+    
+    .topbar .label {
+      color: var(--ink-dim);
+      font-family: 'Dancing Script', cursive;
+      font-size: 18px;
+      font-weight: 600;
+      opacity: .9;
+      user-select: none;
+      white-space: nowrap;
+    }
+    
+    /* ========================================
+       SURREALIST INPUT COMPONENTS
+       ======================================== */
+    
+    .task-input {
+      width: 20ch;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--accent);
+      caret-color: var(--accent);
+      font: 600 17px 'Playfair Display', serif;
+      padding: 8px 10px 6px;
+      border-bottom: 2px dashed transparent;
+      transition: all .3s ease;
+      position: relative;
+    }
+    
+    .task-input::placeholder {
+      color: rgba(240,230,240,.3);
+      font-style: italic;
+    }
+    
+    .task-input:focus {
+      border-bottom-color: var(--accent);
+      box-shadow: 0 4px 0 -2px rgba(255,107,157,.4);
+      transform: translateY(-2px);
+    }
+    
+    .hint {
+      font-size: 13px;
+      color: rgba(255,255,255,.4);
+      margin-left: 8px;
+      font-family: 'Dancing Script', cursive;
+    }
+    
+    /* ========================================
+       SURREALIST BOARD LAYOUT
+       ======================================== */
+    
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
+      padding: 20px 20px 25px;
+      perspective: 1000px;
+    }
+    
+    .board .list-card:last-child {
+      grid-column: 1/-1;
+    }
+    
+    /* ========================================
+       SURREALIST LIST CARDS
+       ======================================== */
+    
+    .list-card {
+      /* Surrealist layered gradients with melting effect */
+      background: 
+        linear-gradient(135deg, rgba(255,107,157,.06), transparent 30%),
+        linear-gradient(45deg, rgba(255,212,0,.04), transparent 25%),
+        linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 
+        var(--shadow),
+        inset 0 0 20px rgba(255,107,157,.1);
+      padding: 15px 15px 18px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform .3s ease;
+    }
+    
+    .list-card:hover {
+      transform: rotateY(2deg) rotateX(1deg);
+    }
+    
+    .list-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--accent), var(--gold), var(--melt), var(--accent));
+      border-radius: var(--radius);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    
+    .list-card:hover::before {
+      opacity: .3;
+    }
+    
+    .list-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font: 700 18px 'Playfair Display', serif;
+      letter-spacing: .4px;
+      margin: 5px 8px 12px;
+      color: #fff;
+      position: relative;
+    }
+    
+    .list-title .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50% 30% 70% 40%;
+      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-dim));
+      box-shadow: 
+        0 0 15px rgba(255,107,157,.8),
+        0 0 30px rgba(255,107,157,.4);
+      animation: surrealPulse 2s ease-in-out infinite;
+      transform: rotate(45deg);
+    }
+    
+    @keyframes surrealPulse {
+      0%, 100% { 
+        transform: rotate(45deg) scale(1);
+        border-radius: 50% 30% 70% 40%;
+      }
+      50% { 
+        transform: rotate(225deg) scale(1.2);
+        border-radius: 30% 70% 40% 50%;
+      }
+    }
+    
+    /* ========================================
+       SURREALIST TABLE CONTAINER
+       ======================================== */
+    
+    .table-wrap {
+      height: calc(var(--head-h) + var(--row-h) * 8);
+      overflow: auto;
+      border-radius: 15px;
+      border: 2px dashed rgba(255,107,157,.2);
+      position: relative;
+      background: 
+        linear-gradient(180deg, rgba(255,107,157,.03), rgba(255,212,0,.02));
+    }
+    
+    .table-wrap::-webkit-scrollbar {
+      height: 10px;
+      width: 10px;
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: linear-gradient(45deg, var(--accent), var(--gold));
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,107,157,.5);
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(45deg, var(--gold), var(--melt));
+    }
+    
+    /* ========================================
+       SURREALIST TABLE STRUCTURE
+       ======================================== */
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 15px;
+    }
+    
+    thead th {
+      position: sticky;
+      top: 0;
+      text-align: left;
+      font-weight: 700;
+      height: var(--head-h);
+      padding: 10px 15px;
+      background: rgba(45,27,45,.9);
+      backdrop-filter: blur(5px);
+      border-bottom: 2px solid rgba(255,107,157,.3);
+      z-index: 2;
+      font-family: 'Playfair Display', serif;
+    }
+    
+    tbody td {
+      height: var(--row-h);
+      padding: 8px 15px;
+      vertical-align: middle;
+      border-bottom: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    
+    /* ========================================
+       SURREALIST TASK ROWS
+       ======================================== */
+    
+    .task-row {
+      cursor: grab;
+      transition: all .3s ease;
+      position: relative;
+    }
+    
+    .task-row:hover {
+      background: rgba(255,107,157,.05);
+      transform: translateX(5px);
+    }
+    
+    .task-row:active {
+      cursor: grabbing;
+      transform: scale(1.02) rotate(1deg);
+    }
+    
+    /* ========================================
+       SURREALIST TASK CHIPS
+       ======================================== */
+    
+    .task-chip {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 25px 15px 25px 15px;
+      background: 
+        linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,107,157,.1));
+      border: 2px solid rgba(255,107,157,.3);
+      color: var(--ink);
+      font-weight: 500;
+      letter-spacing: .3px;
+      box-shadow: 
+        0 0 15px rgba(255,107,157,.2) inset,
+        0 4px 8px rgba(0,0,0,.2);
+      transition: all .3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .task-chip::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+      transition: left .5s ease;
+    }
+    
+    .task-chip:hover::before {
+      left: 100%;
+    }
+    
+    .task-chip:hover {
+      transform: translateY(-2px) rotate(1deg);
+      box-shadow: 
+        0 0 20px rgba(255,107,157,.4) inset,
+        0 6px 12px rgba(0,0,0,.3);
+    }
+    
+    /* ========================================
+       SURREALIST DRAG & DROP STATES
+       ======================================== */
+    
+    .dragging {
+      opacity: .7;
+      filter: hue-rotate(30deg) saturate(1.3);
+      transform: rotate(5deg) scale(1.05);
+    }
+    
+    .empty-row td {
+      color: rgba(255,255,255,.2);
+      border-bottom: none;
+      position: relative;
+    }
+    
+    .empty-row:hover td {
+      background: rgba(255,107,157,.08);
+    }
+    
+    .table-wrap.dropzone {
+      border: 2px dashed var(--accent) !important;
+      box-shadow: 0 0 20px rgba(255,107,157,.4);
+      animation: surrealGlow 1s ease-in-out infinite alternate;
+    }
+    
+    @keyframes surrealGlow {
+      0% { box-shadow: 0 0 20px rgba(255,107,157,.4); }
+      100% { box-shadow: 0 0 30px rgba(255,107,157,.6), 0 0 40px rgba(255,212,0,.3); }
+    }
+    
+    /* ========================================
+       SURREALIST HEADER INPUT
+       ======================================== */
+    
+    thead th .task-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--ink);
+      font: 500 17px 'Playfair Display', serif;
+      padding: 10px 15px;
+      text-align: left;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    thead th .task-input::placeholder {
+      color: rgba(255,255,255,.5);
+      font-style: italic;
+    }
+    
+    /* ========================================
+       SURREALIST TASK BANK LAYOUT
+       ======================================== */
+    
+    .bank-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      padding: 0 10px 10px;
+    }
+    
+    /* ========================================
+       SURREALIST TIMER ANIMATIONS
+       ======================================== */
+    
+    .timer-done {
+      color: var(--accent);
+      animation: surrealBlink 1.5s ease-in-out infinite;
+      font-weight: 700;
+    }
+    
+    @keyframes surrealBlink {
+      0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% { 
+        opacity: .3;
+        transform: scale(1.1);
+      }
+    }
+    
+    /* ========================================
+       SURREALIST FLOATING ELEMENTS
+       ======================================== */
+    
+    .floating-element {
+      position: absolute;
+      pointer-events: none;
+      opacity: .1;
+      animation: floatAround 15s linear infinite;
+    }
+    
+    @keyframes floatAround {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(100px, -50px) rotate(90deg); }
+      50% { transform: translate(50px, 100px) rotate(180deg); }
+      75% { transform: translate(-50px, 50px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Surrealist floating elements -->
+  <div class="floating-element" style="top: 10%; left: 10%; font-size: 24px;">🕰️</div>
+  <div class="floating-element" style="top: 20%; right: 15%; font-size: 20px;">🌙</div>
+  <div class="floating-element" style="bottom: 30%; left: 20%; font-size: 18px;">✨</div>
+  <div class="floating-element" style="top: 60%; right: 10%; font-size: 22px;">🔮</div>
+  
+  <main class="board">
+    
+    <!-- ========================================
+         SURREALIST CURRENT FOCUS SECTION
+         ======================================== -->
+    <section class="list-card" data-list="now">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Dream Focus
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:90px">⏱️</th>
+              <th>Vision</th>
+            </tr>
+          </thead>
+          <tbody id="now-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         SURREALIST NEEDS DOING SECTION
+         ======================================== -->
+    <section class="list-card" data-list="soon">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Emerging Dreams
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:90px">Born</th>
+              <th>Manifestation</th>
+            </tr>
+          </thead>
+          <tbody id="soon-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         SURREALIST TASK BANK SECTION
+         ======================================== -->
+    <section class="list-card" data-list="bank">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Dream Repository
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th colspan="3">
+                <input 
+                  id="newTask" 
+                  class="task-input" 
+                  type="text" 
+                  maxlength="120" 
+                  placeholder="Weave a new dream..." 
+                  autocomplete="off" 
+                />
+              </th>
+            </tr>
+          </thead>
+        </table>
+        
+        <div class="bank-columns">
+          <table class="task-table">
+            <tbody id="bank-col1-body">
+              <!-- Column 1 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col2-body">
+              <!-- Column 2 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col3-body">
+              <!-- Column 3 tasks -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  <script>
+    /* ========================================
+       DOM MANIPULATION UTILITIES
+       ======================================== */
+    
+    const $ = id => document.getElementById(id);
+    
+    const el = (tag, attrs = {}, kids = []) => {
+      const n = document.createElement(tag);
+      
+      for (const k in attrs) {
+        if (k === 'style') {
+          Object.assign(n.style, attrs.style);
+        } else if (k === 'dataset') {
+          Object.assign(n.dataset, attrs.dataset);
+        } else {
+          n[k] = attrs[k];
+        }
+      }
+      
+      kids.forEach(ch => n.appendChild(ch));
+      return n;
+    };
+    
+    const replace = (node, children) => node.replaceChildren(...children);
+
+    /* ========================================
+       SURREALIST COLOR SYSTEM
+       ======================================== */
+    
+    const COLORS = [
+      '#ff6b9d',  // Dreamy pink
+      '#ffd700',  // Surreal gold
+      '#ff8c42',  // Melting orange
+      '#9d4edd',  // Mystical purple
+      '#06ffa5',  // Ethereal green
+      '#ffbe0b'   // Cosmic yellow
+    ];
+    
+    const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    /* ========================================
+       APPLICATION STATE
+       ======================================== */
+    
+    const state = {
+      tasks: {},
+      lists: {
+        now: [],
+        soon: [],
+        bank: []
+      }
+    };
+    
+    const MIN_VISIBLE_ROWS = 8;
+
+    /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+    
+    const els = {
+      input: $('newTask'),
+      bodies: {
+        now: $('now-body'),
+        soon: $('soon-body'),
+        bankCol1: $('bank-col1-body'),
+        bankCol2: $('bank-col2-body'),
+        bankCol3: $('bank-col3-body')
+      }
+    };
+
+    /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+    
+    const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    /* ========================================
+       TASK MANAGEMENT FUNCTIONS
+       ======================================== */
+    
+    function addTaskToBank(text) {
+      const id = uid();
+      
+      state.tasks[id] = {
+        text: text.trim(),
+        textColor: randomColor()
+      };
+      
+      state.lists.bank.push(id);
+      renderAll();
+    }
+
+    const chipFor = id => {
+      const t = state.tasks[id];
+      
+      if (!t) {
+        console.warn(`Task with id ${id} not found in state.tasks`);
+        return el('span', {
+          className: 'task-chip',
+          textContent: '[Dream lost...]'
+        });
+      }
+      
+      const s = el('span', { className: 'task-chip' });
+      s.textContent = t.text;
+      s.style.color = t.textColor || '#f0e6f0';
+      return s;
+    };
+
+    /* ========================================
+       TIME FORMATTING UTILITIES
+       ======================================== */
+    
+    const sameDay = (a, b) => 
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+    
+    const formatSoon = ms => {
+      const d = new Date(ms);
+      const now = new Date();
+      
+      return sameDay(d, now) 
+        ? d.toLocaleTimeString([], { hour: 'numeric' })
+        : d.toLocaleDateString([], { month: 'numeric', day: 'numeric' });
+    };
+
+    /* ========================================
+       RENDERING SYSTEM
+       ======================================== */
+    
+    function renderAll() {
+      renderList('now');
+      renderList('soon');
+      renderBank();
+    }
+
+    function renderList(listId) {
+      const body = els.bodies[listId];
+      const ids = state.lists[listId];
+      
+      const rows = ids.map((id, index) => {
+        if (!state.tasks[id]) {
+          console.warn(`Task with id ${id} not found in state.tasks`);
+          return null;
+        }
+        
+        const tdA = el('td');
+        
+        if (listId === 'soon') {
+          const ts = state.tasks[id].addedSoonAt;
+          tdA.textContent = ts ? formatSoon(ts) : '—';
+        }
+        
+        if (listId === 'now') {
+          const end = state.tasks[id].nowEndAt;
+          if (end) {
+            const rem = end - Date.now();
+            if (rem <= 0) {
+              tdA.textContent = '∞';
+              tdA.classList.add('timer-done');
+            } else {
+              tdA.textContent = formatMMSS(rem);
+              tdA.classList.remove('timer-done');
+            }
+          } else {
+            tdA.textContent = '';
+          }
+        }
+        
+        const tr = el('tr', {
+          className: 'task-row',
+          draggable: true,
+          dataset: { taskId: id, listId, index }
+        }, [
+          tdA,
+          el('td', {}, [chipFor(id)])
+        ]);
+        
+        attachRowDnD(tr);
+        return tr;
+      }).filter(row => row !== null);
+      
+      const placeholders = Math.max(MIN_VISIBLE_ROWS - ids.length, 0);
+      for (let i = 0; i < placeholders; i++) {
+        const ph = el('tr', {
+          className: 'empty-row',
+          dataset: { listId }
+        }, [el('td'), el('td')]);
+        attachDropToRow(ph);
+        rows.push(ph);
+      }
+      
+      attachDropToTbody(body);
+      replace(body, rows);
+    }
+
+    function renderBank() {
+      const ids = state.lists.bank;
+      const columns = [[], [], []];
+      
+      ids.forEach((id, i) => columns[i % 3].push(id));
+      
+      const paint = (bodyEl, colIds, colIndex) => {
+        const nodes = colIds.map((id, i) => {
+          const index = colIndex + i * 3;
+          
+          const tr = el('tr', {
+            className: 'task-row',
+            draggable: true,
+            dataset: { taskId: id, listId: 'bank', index }
+          }, [
+            el('td', {}, [chipFor(id)])
+          ]);
+          
+          attachRowDnD(tr);
+          return tr;
+        });
+        
+        const placeholders = Math.max(MIN_VISIBLE_ROWS - colIds.length, 0);
+        for (let i = 0; i < placeholders; i++) {
+          const ph = el('tr', {
+            className: 'empty-row',
+            dataset: { listId: 'bank' }
+          }, [el('td')]);
+          attachDropToRow(ph);
+          nodes.push(ph);
+        }
+        
+        attachDropToTbody(bodyEl);
+        replace(bodyEl, nodes);
+      };
+      
+      paint(els.bodies.bankCol1, columns[0], 0);
+      paint(els.bodies.bankCol2, columns[1], 1);
+      paint(els.bodies.bankCol3, columns[2], 2);
+    }
+
+    /* ========================================
+       DRAG & DROP SYSTEM
+       ======================================== */
+    
+    let dragData = null;
+    
+    const getList = id => 
+      id ? (id.startsWith('bank-') ? 'bank' : id.replace('-body', '')) : null;
+    
+    function bankDropIndexFromRow(tr) {
+      const tbodyId = tr.closest('tbody').id;
+      const colMatch = tbodyId.match(/bank-col(\d+)-body/);
+      
+      if (!colMatch) return 0;
+      
+      const colIndex = parseInt(colMatch[1]) - 1;
+      let realIndex = 0;
+      
+      for (const c of tr.parentElement.children) {
+        if (c === tr) break;
+        if (c.classList.contains('task-row')) realIndex++;
+      }
+      
+      return colIndex + realIndex * 3;
+    }
+    
+    const clearDnD = () => {
+      document.querySelectorAll('.table-wrap').forEach(tw => 
+        tw.classList.remove('dropzone')
+      );
+      document.querySelectorAll('tr.drop-before').forEach(el => 
+        el.classList.remove('drop-before')
+      );
+    };
+
+    function attachRowDnD(tr) {
+      tr.addEventListener('dragstart', e => {
+        const { taskId, listId, index } = tr.dataset;
+        dragData = { taskId, fromList: listId, fromIndex: Number(index) };
+        tr.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', taskId);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      
+      tr.addEventListener('dragend', () => {
+        tr.classList.remove('dragging');
+        clearDnD();
+        dragData = null;
+      });
+      
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        document.querySelectorAll('tr.drop-before').forEach(el => 
+          el.classList.remove('drop-before')
+        );
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const tbody = tr.closest('tbody');
+        const toList = getList(tbody.id);
+        const beforeIndex = (toList === 'bank') 
+          ? bankDropIndexFromRow(tr) 
+          : Array.from(tr.parentElement.children).indexOf(tr);
+        
+        moveTask(dragData.taskId, dragData.fromList, toList, beforeIndex);
+        dragData = null;
+      });
+    }
+
+    function attachDropToRow(tr) {
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(tr.closest('tbody').id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function attachDropToTbody(tbody) {
+      if (tbody.dataset.bound === '1') return;
+      tbody.dataset.bound = '1';
+      
+      tbody.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tbody.closest('.table-wrap').classList.add('dropzone');
+      });
+      
+      tbody.addEventListener('dragleave', () => 
+        tbody.closest('.table-wrap').classList.remove('dropzone')
+      );
+      
+      tbody.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(e.currentTarget.id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function moveTask(taskId, fromList, toList, beforeIndex) {
+      clearDnD();
+      if (!taskId || !fromList || !toList) return;
+      
+      if (!state.tasks[taskId]) {
+        console.warn(`Cannot move task with id ${taskId} - task not found in state.tasks`);
+        return;
+      }
+      
+      const fromArr = state.lists[fromList];
+      const i = fromArr.indexOf(taskId);
+      if (i > -1) fromArr.splice(i, 1);
+      
+      const toArr = state.lists[toList];
+      
+      if (toList === 'soon' && !state.tasks[taskId].addedSoonAt) {
+        state.tasks[taskId].addedSoonAt = Date.now();
+      }
+      
+      if (toList === 'now') {
+        state.tasks[taskId].nowEndAt = Date.now() + 30 * 60 * 1000;
+        ensureNowInterval();
+      }
+      
+      const dest = Number.isFinite(beforeIndex) 
+        ? Math.min(Math.max(0, beforeIndex), toArr.length) 
+        : toArr.length;
+      
+      if (!toArr.includes(taskId)) {
+        toArr.splice(dest, 0, taskId);
+      }
+      
+      renderAll();
+    }
+
+    /* ========================================
+       TIMER SYSTEM FOR "NOW" TASKS
+       ======================================== */
+    
+    let nowInterval = null;
+    
+    function ensureNowInterval() {
+      if (!nowInterval) {
+        nowInterval = setInterval(() => {
+          if (state.lists.now.length) {
+            renderList('now');
+          } else {
+            clearInterval(nowInterval);
+            nowInterval = null;
+          }
+        }, 1000);
+      }
+    }
+    
+    function clearNowInterval() {
+      if (nowInterval) {
+        clearInterval(nowInterval);
+        nowInterval = null;
+      }
+    }
+    
+    window.addEventListener('beforeunload', clearNowInterval);
+    
+    const pad = n => String(n).padStart(2, '0');
+    
+    function formatMMSS(ms) {
+      const sec = Math.ceil(ms / 1000);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${pad(m)}:${pad(s)}`;
+    }
+
+    /* ========================================
+       INPUT HANDLING
+       ======================================== */
+    
+    els.input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const v = els.input.value.trim();
+        if (v) {
+          addTaskToBank(v);
+          els.input.value = '';
+        }
+      }
+    });
+
+    /* ========================================
+       APPLICATION INITIALIZATION
+       ======================================== */
+    
+    function init() {
+      renderAll();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+  </script>
+</body>
+</html>

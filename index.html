@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todd's Random Projects</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Todd's Random Projects</h1>
+            <p class="subtitle">A collection of games and tools I've been working on.</p>
+            <p class="subtitle">Almost none of these are nearly complete, just test projects I may never finish.</p>
+        </header>
+
+        <main class="main-content">
+            <div class="categories" id="categories">
+                <!-- Categories will be dynamically generated -->
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p class="footer-text">Made with AI assistance • Always adding new stuff</p>
+        </footer>
+    </div>
+
+    <!-- Game/Tool iframe overlay -->
+    <div class="iframe-overlay" id="iframeOverlay">
+        <div class="iframe-container">
+            <button class="close-button" id="closeButton">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            <iframe id="gameFrame" src="" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Neopets-Inspired Task Board Application
+    A bright, innocent 2004 web aesthetic with candy colors,
+    cute rounded elements, and playful animations.
+  -->
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NeoTask Board</title>
+  
+  <!-- Google Fonts: Comic Neue for playful feel, and Fredoka for rounded friendly text -->
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       NEOPETS DESIGN SYSTEM
+       ======================================== */
+    
+    :root {
+      /* === NEOPETS COLOR PALETTE === */
+      --bg: #ffebf7;           /* Bright pink background */
+      --panel: #ffffff;        /* Pure white panels */
+      --panel-2: #fff0f8;      /* Light pink for depth */
+      --ink: #4a4a4a;          /* Dark gray text */
+      --ink-dim: #8a8a8a;      /* Muted gray text */
+      --line: #ffb3d9;         /* Pink borders */
+      
+      /* === NEOPETS ACCENTS === */
+      --accent: #ff69b4;       /* Hot pink */
+      --accent-dim: #ff1493;   /* Deep pink */
+      --yellow: #ffd700;       /* Bright yellow */
+      --blue: #87ceeb;         /* Sky blue */
+      --green: #98fb98;        /* Pale green */
+      --purple: #da70d6;       /* Orchid */
+      --orange: #ffa500;       /* Orange */
+      
+      /* === LAYOUT DIMENSIONS === */
+      --row-h: 48px;           /* Generous row height */
+      --head-h: 56px;          /* Spacious headers */
+      
+      /* === NEOPETS EFFECTS === */
+      --radius: 20px;          /* Very rounded corners */
+      --shadow: 0 4px 20px rgba(255,105,180,.3);  /* Pink shadow */
+    }
+    
+    /* ========================================
+       GLOBAL RESET & NEOPETS BASE
+       ======================================== */
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      /* Neopets-style bright background with multiple gradients */
+      background: 
+        radial-gradient(1200px 800px at 20% -10%, rgba(255,105,180,.1), transparent 50%),
+        radial-gradient(1000px 600px at 80% 20%, rgba(255,215,0,.08), transparent 45%),
+        radial-gradient(800px 500px at 50% 80%, rgba(135,206,235,.06), transparent 40%),
+        linear-gradient(135deg, var(--bg) 0%, #fff0f8 50%, var(--bg) 100%);
+      color: var(--ink);
+      font-family: 'Fredoka', sans-serif;
+      letter-spacing: .02em;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* Floating cute elements */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(255,105,180,.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(255,215,0,.04) 0%, transparent 50%),
+        radial-gradient(circle at 50% 20%, rgba(135,206,235,.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+      animation: cuteFloat 15s ease-in-out infinite;
+    }
+    
+    @keyframes cuteFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33% { transform: translateY(-8px) rotate(1deg); }
+      66% { transform: translateY(4px) rotate(-1deg); }
+    }
+    
+    /* ========================================
+       NEOPETS TOP BAR
+       ======================================== */
+    
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px 16px;
+      border-bottom: 3px solid var(--accent);
+      background: linear-gradient(135deg, #ffffff, #fff0f8);
+      position: relative;
+    }
+    
+    .topbar::before {
+      content: '✨ Welcome to NeoTask! ✨';
+      position: absolute;
+      top: 50%;
+      right: 24px;
+      transform: translateY(-50%);
+      font-family: 'Comic Neue', cursive;
+      font-size: 14px;
+      color: var(--accent);
+      animation: sparkle 2s ease-in-out infinite;
+    }
+    
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+      50% { opacity: 0.7; transform: translateY(-50%) scale(1.1); }
+    }
+    
+    .topbar .label {
+      color: var(--ink-dim);
+      font-family: 'Comic Neue', cursive;
+      font-size: 16px;
+      font-weight: 700;
+      opacity: .9;
+      user-select: none;
+      white-space: nowrap;
+    }
+    
+    /* ========================================
+       NEOPETS INPUT COMPONENTS
+       ======================================== */
+    
+    .task-input {
+      width: 24ch;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--accent);
+      caret-color: var(--accent);
+      font: 600 16px 'Fredoka', sans-serif;
+      padding: 8px 12px 6px;
+      border-bottom: 3px solid transparent;
+      transition: all .3s ease;
+    }
+    
+    .task-input::placeholder {
+      color: rgba(255,105,180,.6);
+    }
+    
+    .task-input:focus {
+      border-bottom-color: var(--accent);
+      box-shadow: 0 4px 0 -1px rgba(255,105,180,.5);
+      transform: translateY(-2px);
+    }
+    
+    .hint {
+      font-size: 12px;
+      color: var(--ink-dim);
+      margin-left: 8px;
+      font-family: 'Comic Neue', cursive;
+    }
+    
+    /* ========================================
+       NEOPETS BOARD LAYOUT
+       ======================================== */
+    
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
+      padding: 24px 28px 28px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .board .list-card:last-child {
+      grid-column: 1/-1;
+    }
+    
+    /* ========================================
+       NEOPETS LIST CARDS
+       ======================================== */
+    
+    .list-card {
+      /* Neopets-style bright gradients */
+      background: 
+        linear-gradient(135deg, rgba(255,105,180,.1), transparent 30%),
+        linear-gradient(45deg, rgba(255,215,0,.08), transparent 25%),
+        linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 3px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 
+        var(--shadow),
+        inset 0 0 20px rgba(255,105,180,.1);
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+      transition: all .3s ease;
+    }
+    
+    .list-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 
+        0 8px 30px rgba(255,105,180,.4),
+        inset 0 0 20px rgba(255,105,180,.15);
+    }
+    
+    .list-card::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      background: linear-gradient(45deg, var(--accent), var(--yellow), var(--blue), var(--green));
+      border-radius: var(--radius);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    
+    .list-card:hover::before {
+      opacity: .3;
+    }
+    
+    .list-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font: 700 18px 'Fredoka', sans-serif;
+      letter-spacing: .02em;
+      margin: 2px 6px 12px;
+      color: var(--ink);
+      position: relative;
+    }
+    
+    .list-title .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-dim));
+      box-shadow: 
+        0 0 15px rgba(255,105,180,.8),
+        0 0 30px rgba(255,105,180,.4);
+      animation: cutePulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes cutePulse {
+      0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(255,105,180,.8), 0 0 30px rgba(255,105,180,.4);
+      }
+      50% { 
+        transform: scale(1.3);
+        box-shadow: 0 0 20px rgba(255,105,180,1), 0 0 40px rgba(255,105,180,.6);
+      }
+    }
+    
+    /* ========================================
+       NEOPETS TABLE CONTAINER
+       ======================================== */
+    
+    .table-wrap {
+      height: calc(var(--head-h) + var(--row-h) * 8);
+      overflow: auto;
+      border-radius: 15px;
+      border: 3px solid var(--line);
+      position: relative;
+      background: 
+        linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,240,248,.8));
+    }
+    
+    .table-wrap::-webkit-scrollbar {
+      height: 10px;
+      width: 10px;
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: linear-gradient(45deg, var(--accent), var(--yellow));
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,105,180,.5);
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(45deg, var(--yellow), var(--blue));
+    }
+    
+    /* ========================================
+       NEOPETS TABLE STRUCTURE
+       ======================================== */
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 15px;
+    }
+    
+    thead th {
+      position: sticky;
+      top: 0;
+      text-align: left;
+      font-weight: 700;
+      height: var(--head-h);
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #ffffff, #fff0f8);
+      border-bottom: 3px solid var(--accent);
+      z-index: 2;
+      font-family: 'Fredoka', sans-serif;
+      color: var(--ink);
+    }
+    
+    tbody td {
+      height: var(--row-h);
+      padding: 8px 16px;
+      vertical-align: middle;
+      border-bottom: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    
+    /* ========================================
+       NEOPETS TASK ROWS
+       ======================================== */
+    
+    .task-row {
+      cursor: grab;
+      transition: all .3s ease;
+      position: relative;
+    }
+    
+    .task-row:hover {
+      background: rgba(255,105,180,.1);
+      transform: translateX(6px);
+    }
+    
+    .task-row:active {
+      cursor: grabbing;
+      transform: scale(1.05) rotate(2deg);
+    }
+    
+    /* ========================================
+       NEOPETS TASK CHIPS
+       ======================================== */
+    
+    .task-chip {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 25px;
+      background: 
+        linear-gradient(135deg, rgba(255,255,255,.9), rgba(255,240,248,.8));
+      border: 2px solid var(--accent);
+      color: var(--ink);
+      font-weight: 500;
+      letter-spacing: .02em;
+      box-shadow: 
+        0 4px 15px rgba(255,105,180,.3) inset,
+        0 2px 8px rgba(0,0,0,.1);
+      transition: all .3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .task-chip::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+      transition: left .5s ease;
+    }
+    
+    .task-chip:hover::before {
+      left: 100%;
+    }
+    
+    .task-chip:hover {
+      transform: translateY(-3px) rotate(1deg);
+      box-shadow: 
+        0 6px 20px rgba(255,105,180,.4) inset,
+        0 4px 12px rgba(0,0,0,.15);
+      border-color: var(--yellow);
+    }
+    
+    /* ========================================
+       NEOPETS DRAG & DROP STATES
+       ======================================== */
+    
+    .dragging {
+      opacity: .7;
+      filter: hue-rotate(30deg) saturate(1.3);
+      transform: rotate(3deg) scale(1.1);
+    }
+    
+    .empty-row td {
+      color: rgba(138,138,138,.3);
+      border-bottom: none;
+      position: relative;
+    }
+    
+    .empty-row:hover td {
+      background: rgba(255,105,180,.08);
+    }
+    
+    .table-wrap.dropzone {
+      border-color: var(--accent) !important;
+      box-shadow: 
+        0 0 25px rgba(255,105,180,.6),
+        inset 0 0 20px rgba(255,105,180,.2);
+      animation: neopetsGlow 1s ease-in-out infinite alternate;
+    }
+    
+    @keyframes neopetsGlow {
+      0% { 
+        box-shadow: 0 0 25px rgba(255,105,180,.6), inset 0 0 20px rgba(255,105,180,.2);
+      }
+      100% { 
+        box-shadow: 0 0 35px rgba(255,105,180,.8), inset 0 0 30px rgba(255,105,180,.3);
+      }
+    }
+    
+    /* ========================================
+       NEOPETS HEADER INPUT
+       ======================================== */
+    
+    thead th .task-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--ink);
+      font: 600 16px 'Fredoka', sans-serif;
+      padding: 10px 16px;
+      text-align: left;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    thead th .task-input::placeholder {
+      color: rgba(255,105,180,.6);
+    }
+    
+    /* ========================================
+       NEOPETS TASK BANK LAYOUT
+       ======================================== */
+    
+    .bank-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      padding: 0 10px 10px;
+    }
+    
+    /* ========================================
+       NEOPETS TIMER ANIMATIONS
+       ======================================== */
+    
+    .timer-done {
+      color: var(--accent);
+      animation: cuteBlink 1.5s ease-in-out infinite;
+      font-weight: 700;
+    }
+    
+    @keyframes cuteBlink {
+      0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 0.4;
+        transform: scale(1.2);
+      }
+    }
+    
+    /* ========================================
+       NEOPETS FLOATING ELEMENTS
+       ======================================== */
+    
+    .floating-element {
+      position: absolute;
+      pointer-events: none;
+      opacity: .2;
+      animation: bounceAround 12s ease-in-out infinite;
+    }
+    
+    @keyframes bounceAround {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(60px, -40px) rotate(90deg); }
+      50% { transform: translate(40px, 60px) rotate(180deg); }
+      75% { transform: translate(-40px, 40px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+    
+    /* ========================================
+       NEOPETS RESPONSIVE DESIGN
+       ======================================== */
+    
+    @media (max-width: 768px) {
+      .board {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px 20px 20px;
+      }
+      
+      .board .list-card:last-child {
+        grid-column: 1;
+      }
+      
+      .bank-columns {
+        grid-template-columns: 1fr;
+      }
+      
+      .topbar::before {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Neopets floating elements -->
+  <div class="floating-element" style="top: 12%; left: 8%; font-size: 32px;">🌟</div>
+  <div class="floating-element" style="top: 25%; right: 12%; font-size: 28px;">💖</div>
+  <div class="floating-element" style="bottom: 30%; left: 15%; font-size: 24px;">🎀</div>
+  <div class="floating-element" style="top: 60%; right: 8%; font-size: 30px;">✨</div>
+  <div class="floating-element" style="top: 40%; left: 3%; font-size: 26px;">🦄</div>
+  
+  <main class="board">
+    
+    <!-- ========================================
+         NEOPETS CURRENT FOCUS SECTION
+         ======================================== -->
+    <section class="list-card" data-list="now">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Current Quest
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:90px">⏰</th>
+              <th>Adventure</th>
+            </tr>
+          </thead>
+          <tbody id="now-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         NEOPETS NEEDS DOING SECTION
+         ======================================== -->
+    <section class="list-card" data-list="soon">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Upcoming Fun
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:90px">Added</th>
+              <th>Activity</th>
+            </tr>
+          </thead>
+          <tbody id="soon-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         NEOPETS TASK BANK SECTION
+         ======================================== -->
+    <section class="list-card" data-list="bank">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Quest Journal
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th colspan="3">
+                <input 
+                  id="newTask" 
+                  class="task-input" 
+                  type="text" 
+                  maxlength="120" 
+                  placeholder="Add a new quest..." 
+                  autocomplete="off" 
+                />
+              </th>
+            </tr>
+          </thead>
+        </table>
+        
+        <div class="bank-columns">
+          <table class="task-table">
+            <tbody id="bank-col1-body">
+              <!-- Column 1 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col2-body">
+              <!-- Column 2 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col3-body">
+              <!-- Column 3 tasks -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  <script>
+    /* ========================================
+       DOM MANIPULATION UTILITIES
+       ======================================== */
+    
+    const $ = id => document.getElementById(id);
+    
+    const el = (tag, attrs = {}, kids = []) => {
+      const n = document.createElement(tag);
+      
+      for (const k in attrs) {
+        if (k === 'style') {
+          Object.assign(n.style, attrs.style);
+        } else if (k === 'dataset') {
+          Object.assign(n.dataset, attrs.dataset);
+        } else {
+          n[k] = attrs[k];
+        }
+      }
+      
+      kids.forEach(ch => n.appendChild(ch));
+      return n;
+    };
+    
+    const replace = (node, children) => node.replaceChildren(...children);
+
+    /* ========================================
+       NEOPETS COLOR SYSTEM
+       ======================================== */
+    
+    const COLORS = [
+      '#ff69b4',  // Hot pink
+      '#ffd700',  // Gold
+      '#87ceeb',  // Sky blue
+      '#98fb98',  // Pale green
+      '#da70d6',  // Orchid
+      '#ffa500',  // Orange
+      '#ffb6c1',  // Light pink
+      '#87cefa'   // Light sky blue
+    ];
+    
+    const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    /* ========================================
+       APPLICATION STATE
+       ======================================== */
+    
+    const state = {
+      tasks: {},
+      lists: {
+        now: [],
+        soon: [],
+        bank: []
+      }
+    };
+    
+    const MIN_VISIBLE_ROWS = 8;
+
+    /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+    
+    const els = {
+      input: $('newTask'),
+      bodies: {
+        now: $('now-body'),
+        soon: $('soon-body'),
+        bankCol1: $('bank-col1-body'),
+        bankCol2: $('bank-col2-body'),
+        bankCol3: $('bank-col3-body')
+      }
+    };
+
+    /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+    
+    const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    /* ========================================
+       TASK MANAGEMENT FUNCTIONS
+       ======================================== */
+    
+    function addTaskToBank(text) {
+      const id = uid();
+      
+      state.tasks[id] = {
+        text: text.trim(),
+        textColor: randomColor()
+      };
+      
+      state.lists.bank.push(id);
+      renderAll();
+    }
+
+    const chipFor = id => {
+      const t = state.tasks[id];
+      
+      if (!t) {
+        console.warn(`Task with id ${id} not found in state.tasks`);
+        return el('span', {
+          className: 'task-chip',
+          textContent: '[Quest lost...]'
+        });
+      }
+      
+      const s = el('span', { className: 'task-chip' });
+      s.textContent = t.text;
+      s.style.color = t.textColor || '#4a4a4a';
+      return s;
+    };
+
+    /* ========================================
+       TIME FORMATTING UTILITIES
+       ======================================== */
+    
+    const sameDay = (a, b) => 
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+    
+    const formatSoon = ms => {
+      const d = new Date(ms);
+      const now = new Date();
+      
+      return sameDay(d, now) 
+        ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+        : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    };
+
+    /* ========================================
+       RENDERING SYSTEM
+       ======================================== */
+    
+    function renderAll() {
+      renderList('now');
+      renderList('soon');
+      renderBank();
+    }
+
+    function renderList(listId) {
+      const body = els.bodies[listId];
+      const ids = state.lists[listId];
+      
+      const rows = ids.map((id, index) => {
+        if (!state.tasks[id]) {
+          console.warn(`Task with id ${id} not found in state.tasks`);
+          return null;
+        }
+        
+        const tdA = el('td');
+        
+        if (listId === 'soon') {
+          const ts = state.tasks[id].addedSoonAt;
+          tdA.textContent = ts ? formatSoon(ts) : '—';
+        }
+        
+        if (listId === 'now') {
+          const end = state.tasks[id].nowEndAt;
+          if (end) {
+            const rem = end - Date.now();
+            if (rem <= 0) {
+              tdA.textContent = '🎉';
+              tdA.classList.add('timer-done');
+            } else {
+              tdA.textContent = formatMMSS(rem);
+              tdA.classList.remove('timer-done');
+            }
+          } else {
+            tdA.textContent = '';
+          }
+        }
+        
+        const tr = el('tr', {
+          className: 'task-row',
+          draggable: true,
+          dataset: { taskId: id, listId, index }
+        }, [
+          tdA,
+          el('td', {}, [chipFor(id)])
+        ]);
+        
+        attachRowDnD(tr);
+        return tr;
+      }).filter(row => row !== null);
+      
+      const placeholders = Math.max(MIN_VISIBLE_ROWS - ids.length, 0);
+      for (let i = 0; i < placeholders; i++) {
+        const ph = el('tr', {
+          className: 'empty-row',
+          dataset: { listId }
+        }, [el('td'), el('td')]);
+        attachDropToRow(ph);
+        rows.push(ph);
+      }
+      
+      attachDropToTbody(body);
+      replace(body, rows);
+    }
+
+    function renderBank() {
+      const ids = state.lists.bank;
+      const columns = [[], [], []];
+      
+      ids.forEach((id, i) => columns[i % 3].push(id));
+      
+      const paint = (bodyEl, colIds, colIndex) => {
+        const nodes = colIds.map((id, i) => {
+          const index = colIndex + i * 3;
+          
+          const tr = el('tr', {
+            className: 'task-row',
+            draggable: true,
+            dataset: { taskId: id, listId: 'bank', index }
+          }, [
+            el('td', {}, [chipFor(id)])
+          ]);
+          
+          attachRowDnD(tr);
+          return tr;
+        });
+        
+        const placeholders = Math.max(MIN_VISIBLE_ROWS - colIds.length, 0);
+        for (let i = 0; i < placeholders; i++) {
+          const ph = el('tr', {
+            className: 'empty-row',
+            dataset: { listId: 'bank' }
+          }, [el('td')]);
+          attachDropToRow(ph);
+          nodes.push(ph);
+        }
+        
+        attachDropToTbody(bodyEl);
+        replace(bodyEl, nodes);
+      };
+      
+      paint(els.bodies.bankCol1, columns[0], 0);
+      paint(els.bodies.bankCol2, columns[1], 1);
+      paint(els.bodies.bankCol3, columns[2], 2);
+    }
+
+    /* ========================================
+       DRAG & DROP SYSTEM
+       ======================================== */
+    
+    let dragData = null;
+    
+    const getList = id => 
+      id ? (id.startsWith('bank-') ? 'bank' : id.replace('-body', '')) : null;
+    
+    function bankDropIndexFromRow(tr) {
+      const tbodyId = tr.closest('tbody').id;
+      const colMatch = tbodyId.match(/bank-col(\d+)-body/);
+      
+      if (!colMatch) return 0;
+      
+      const colIndex = parseInt(colMatch[1]) - 1;
+      let realIndex = 0;
+      
+      for (const c of tr.parentElement.children) {
+        if (c === tr) break;
+        if (c.classList.contains('task-row')) realIndex++;
+      }
+      
+      return colIndex + realIndex * 3;
+    }
+    
+    const clearDnD = () => {
+      document.querySelectorAll('.table-wrap').forEach(tw => 
+        tw.classList.remove('dropzone')
+      );
+      document.querySelectorAll('tr.drop-before').forEach(el => 
+        el.classList.remove('drop-before')
+      );
+    };
+
+    function attachRowDnD(tr) {
+      tr.addEventListener('dragstart', e => {
+        const { taskId, listId, index } = tr.dataset;
+        dragData = { taskId, fromList: listId, fromIndex: Number(index) };
+        tr.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', taskId);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      
+      tr.addEventListener('dragend', () => {
+        tr.classList.remove('dragging');
+        clearDnD();
+        dragData = null;
+      });
+      
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        document.querySelectorAll('tr.drop-before').forEach(el => 
+          el.classList.remove('drop-before')
+        );
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const tbody = tr.closest('tbody');
+        const toList = getList(tbody.id);
+        const beforeIndex = (toList === 'bank') 
+          ? bankDropIndexFromRow(tr) 
+          : Array.from(tr.parentElement.children).indexOf(tr);
+        
+        moveTask(dragData.taskId, dragData.fromList, toList, beforeIndex);
+        dragData = null;
+      });
+    }
+
+    function attachDropToRow(tr) {
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(tr.closest('tbody').id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function attachDropToTbody(tbody) {
+      if (tbody.dataset.bound === '1') return;
+      tbody.dataset.bound = '1';
+      
+      tbody.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tbody.closest('.table-wrap').classList.add('dropzone');
+      });
+      
+      tbody.addEventListener('dragleave', () => 
+        tbody.closest('.table-wrap').classList.remove('dropzone')
+      );
+      
+      tbody.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(e.currentTarget.id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function moveTask(taskId, fromList, toList, beforeIndex) {
+      clearDnD();
+      if (!taskId || !fromList || !toList) return;
+      
+      if (!state.tasks[taskId]) {
+        console.warn(`Cannot move task with id ${taskId} - task not found in state.tasks`);
+        return;
+      }
+      
+      const fromArr = state.lists[fromList];
+      const i = fromArr.indexOf(taskId);
+      if (i > -1) fromArr.splice(i, 1);
+      
+      const toArr = state.lists[toList];
+      
+      if (toList === 'soon' && !state.tasks[taskId].addedSoonAt) {
+        state.tasks[taskId].addedSoonAt = Date.now();
+      }
+      
+      if (toList === 'now') {
+        state.tasks[taskId].nowEndAt = Date.now() + 30 * 60 * 1000;
+        ensureNowInterval();
+      }
+      
+      const dest = Number.isFinite(beforeIndex) 
+        ? Math.min(Math.max(0, beforeIndex), toArr.length) 
+        : toArr.length;
+      
+      if (!toArr.includes(taskId)) {
+        toArr.splice(dest, 0, taskId);
+      }
+      
+      renderAll();
+    }
+
+    /* ========================================
+       TIMER SYSTEM FOR "NOW" TASKS
+       ======================================== */
+    
+    let nowInterval = null;
+    
+    function ensureNowInterval() {
+      if (!nowInterval) {
+        nowInterval = setInterval(() => {
+          if (state.lists.now.length) {
+            renderList('now');
+          } else {
+            clearInterval(nowInterval);
+            nowInterval = null;
+          }
+        }, 1000);
+      }
+    }
+    
+    function clearNowInterval() {
+      if (nowInterval) {
+        clearInterval(nowInterval);
+        nowInterval = null;
+      }
+    }
+    
+    window.addEventListener('beforeunload', clearNowInterval);
+    
+    const pad = n => String(n).padStart(2, '0');
+    
+    function formatMMSS(ms) {
+      const sec = Math.ceil(ms / 1000);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${pad(m)}:${pad(s)}`;
+    }
+
+    /* ========================================
+       INPUT HANDLING
+       ======================================== */
+    
+    els.input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const v = els.input.value.trim();
+        if (v) {
+          addTaskToBank(v);
+          els.input.value = '';
+        }
+      }
+    });
+
+    /* ========================================
+       APPLICATION INITIALIZATION
+       ======================================== */
+    
+    function init() {
+      renderAll();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+  </script>
+</body>
+</html>

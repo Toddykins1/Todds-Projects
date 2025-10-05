@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Cyber Snake - Game of the Day</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+
+        body {
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a0033 0%, #000000 100%);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #00ffff;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+            font-size: 2.5em;
+            color: #00ffff;
+            animation: neonPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            from { text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff; }
+            to { text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 80px #00ffff; }
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .score, .high-score {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ffff;
+            border-radius: 5px;
+            background: #000011;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), inset 0 0 30px rgba(0, 255, 255, 0.1);
+            image-rendering: pixelated;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            background: rgba(0, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .controls h3 {
+            margin-top: 0;
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ffff;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            border: 2px solid #ff00ff;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+
+        .restart-btn:hover {
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .game-container {
+            position: relative;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>⚡ NEON CYBER SNAKE ⚡</h1>
+    
+    <div class="game-info">
+        <div class="score">SCORE: <span id="score">0</span></div>
+        <div class="high-score">HIGH: <span id="highScore">0</span></div>
+    </div>
+
+    <div class="game-container">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div class="game-over" id="gameOver">
+            <h2>SYSTEM FAILURE</h2>
+            <p>FINAL SCORE: <span id="finalScore">0</span></p>
+            <button class="restart-btn" onclick="restartGame()">REBOOT</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <h3>NEURAL INTERFACE</h3>
+        <p>Use arrow keys or WASD to navigate the matrix</p>
+        <p>Collect data packets to expand your neural network!</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+
+        // Game variables
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [{x: 10, y: 10}];
+        let food = {};
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let highScore = localStorage.getItem('cyberSnakeHighScore') || 0;
+        let gameRunning = true;
+        let nextDirection = null;
+
+        // Initialize high score display
+        highScoreElement.textContent = highScore;
+
+        // Generate random food position
+        function randomFood() {
+            food = {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+            
+            for (let segment of snake) {
+                if (segment.x === food.x && segment.y === food.y) {
+                    randomFood();
+                    return;
+                }
+            }
+        }
+
+        // Cyber sound effects
+        function playCyberEatSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(2000, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        function playCyberGameOverSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(20, audioContext.currentTime + 0.8);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.8);
+        }
+
+        // Draw cyber grid (optimized)
+        function drawCyberGrid() {
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let i = 0; i <= tileCount; i++) {
+                ctx.moveTo(i * gridSize, 0);
+                ctx.lineTo(i * gridSize, canvas.height);
+                ctx.moveTo(0, i * gridSize);
+                ctx.lineTo(canvas.width, i * gridSize);
+            }
+            ctx.stroke();
+        }
+
+        // Draw game elements
+        function drawGame() {
+            // Clear canvas with cyber background
+            ctx.fillStyle = '#000011';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawCyberGrid();
+
+
+            // Draw snake with cyber effects
+            for (let i = 0; i < snake.length; i++) {
+                const segment = snake[i];
+                
+                if (i === 0) {
+                    // Snake head with intense glow
+                    ctx.shadowColor = '#00ffff';
+                    ctx.shadowBlur = 8;
+                    ctx.fillStyle = '#00ffff';
+                } else {
+                    // Snake body with gradient
+                    ctx.shadowBlur = 3;
+                    const intensity = 1 - (i / snake.length) * 0.5;
+                    ctx.fillStyle = `rgba(0, 255, 255, ${intensity})`;
+                }
+                
+                const x = segment.x * gridSize + 1;
+                const y = segment.y * gridSize + 1;
+                const size = gridSize - 2;
+                
+                ctx.fillRect(x, y, size, size);
+                
+                // Add cyber pattern overlay
+                if (i === 0) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(x + 2, y + 2, 4, 4);
+                    ctx.fillRect(x + size - 6, y + 2, 4, 4);
+                }
+            }
+
+            // Reset shadow
+            ctx.shadowBlur = 0;
+
+            // Draw data packet (food) with pulsing effect
+            const pulse = Math.sin(Date.now() * 0.02) * 0.3 + 0.7;
+            ctx.fillStyle = `rgba(255, 0, 255, ${pulse})`;
+            ctx.shadowColor = '#ff00ff';
+            ctx.shadowBlur = 6;
+            
+            const foodX = food.x * gridSize + 2;
+            const foodY = food.y * gridSize + 2;
+            const foodSize = gridSize - 4;
+            
+            ctx.fillRect(foodX, foodY, foodSize, foodSize);
+            
+            // Add data packet pattern
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(foodX + 4, foodY + 4, 2, 2);
+            ctx.fillRect(foodX + foodSize - 6, foodY + 4, 2, 2);
+            ctx.fillRect(foodX + 4, foodY + foodSize - 6, 2, 2);
+            ctx.fillRect(foodX + foodSize - 6, foodY + foodSize - 6, 2, 2);
+            
+            ctx.shadowBlur = 0;
+        }
+
+        // Move snake
+        function moveSnake() {
+            if (!gameRunning) return;
+
+            // Process queued direction change
+            if (nextDirection) {
+                const { newDx, newDy } = nextDirection;
+                if (snake.length === 1 || (newDx !== -dx && newDy !== -dy)) {
+                    dx = newDx;
+                    dy = newDy;
+                }
+                nextDirection = null;
+            }
+
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+            // Check wall collision
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                gameOver();
+                return;
+            }
+
+            // Check self collision
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                    return;
+                }
+            }
+
+
+            snake.unshift(head);
+
+            // Check food collision
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                scoreElement.textContent = score;
+                playCyberEatSound();
+                
+                
+                randomFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        // Game over
+        function gameOver() {
+            gameRunning = false;
+            playCyberGameOverSound();
+            
+            if (score > highScore) {
+                highScore = score;
+                highScoreElement.textContent = highScore;
+                localStorage.setItem('cyberSnakeHighScore', highScore);
+            }
+            
+            finalScoreElement.textContent = score;
+            gameOverElement.style.display = 'block';
+        }
+
+        // Restart game
+        function restartGame() {
+            snake = [{x: 10, y: 10}];
+            dx = 0;
+            dy = 0;
+            nextDirection = null;
+            score = 0;
+            scoreElement.textContent = score;
+            gameRunning = true;
+            gameOverElement.style.display = 'none';
+            randomFood();
+        }
+
+        // Handle keyboard input
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+            }
+
+            if (!gameRunning) return;
+
+            const key = e.key.toLowerCase();
+            
+            // Queue direction change for next game tick
+            if (key === 'arrowleft' || key === 'a') {
+                nextDirection = { newDx: -1, newDy: 0 };
+            } else if (key === 'arrowup' || key === 'w') {
+                nextDirection = { newDx: 0, newDy: -1 };
+            } else if (key === 'arrowright' || key === 'd') {
+                nextDirection = { newDx: 1, newDy: 0 };
+            } else if (key === 'arrowdown' || key === 's') {
+                nextDirection = { newDx: 0, newDy: 1 };
+            }
+        });
+
+        // Game loop
+        function gameLoop() {
+            moveSnake();
+            drawGame();
+        }
+
+        // Initialize game
+        randomFood();
+        setInterval(gameLoop, 120);
+        drawGame();
+    </script>
+</body>
+</html>

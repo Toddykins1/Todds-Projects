@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orb Royale with Impact Glow</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #111; }
+    canvas { display: block; }
+    #gameOverOverlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      font-family: sans-serif;
+      font-size: 24px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="gameOverOverlay"></div>
+    <!-- Universal Back Button -->
+    <script src="../../back-button.js"></script>
+    
+    <script>
+    // --- Constants ---
+    const ACCEL = 4000 / 6;
+    const SPRINT_MULT = 1.8;
+    const DRAG = 1.6;
+    const MAX_DT = 0.1;
+    const CIRCLE_RESTITUTION = 1;
+    const FALL_SHRINK_RATE = 100 / 8;
+    const FALL_PUSH = 40;
+    const SHRINK_DURATION = 5 * 60;
+    const GAME_OVER_DELAY = 2;
+    const CAMERA_LAG = 3;
+
+    // --- Glow Settings ---
+    const GLOW_THRESHOLD = 120;
+    const GLOW_DECAY = 3;
+    const SAT_BOOST = 90;
+    const LIGHT_BOOST = 10;
+    const MAX_SHADOW_BLUR = 10;
+
+    // --- Soft Light Periwinkle Palette (all orbs identical) ---
+    const COLOR_PALETTE = Array(16).fill({
+      h: 235,   // periwinkle hue
+      s: 90,    // moderate saturation
+      l: 75     // lightness for a soft glow
+    });
+
+
+    // --- Neon Color Palette: Purples, Oranges/Reds, Teals/Blues ---
+    // const COLOR_PALETTE = [
+    //   // Purples / Magentas
+    //   {h: 260, s: 100, l: 50},
+    //   {h: 275, s: 100, l: 50},
+    //   {h: 290, s: 100, l: 50},
+    //   {h: 305, s: 100, l: 50},
+    //   {h: 320, s: 100, l: 50},
+    //   // Oranges / Reds
+    //   {h:   0, s: 100, l: 50},
+    //   {h:  10, s: 100, l: 50},
+    //   {h:  20, s: 100, l: 50},
+    //   {h:  30, s: 100, l: 50},
+    //   {h: 340, s: 100, l: 50},
+    //   {h: 350, s: 100, l: 50},
+    //   // Teals / Blues
+    //   {h: 160, s: 100, l: 50},
+    //   {h: 175, s: 100, l: 50},
+    //   {h: 190, s: 100, l: 50},
+    //   {h: 205, s: 100, l: 50},
+    //   {h: 220, s: 100, l: 50},
+    // ];
+
+    // --- Canvas Setup ---
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    let width, height, center, mapRadius, initialMapRadius, mapShrinkSpeed;
+    let camera = { x: 0, y: 0 };
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      center = { x: width / 2, y: height / 2 };
+      initialMapRadius = Math.min(width, height) / 2 - 20;
+      mapRadius = initialMapRadius;
+      mapShrinkSpeed = initialMapRadius / SHRINK_DURATION;
+      camera.x = center.x; camera.y = center.y;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // --- Input & Overlay ---
+    const keys = {};
+    window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (gameOverShown && e.key.toLowerCase()==='r') location.reload(); });
+    window.addEventListener('keyup',   e => { keys[e.key.toLowerCase()] = false; });
+    window.addEventListener('blur',    () => { for (const k in keys) keys[k] = false; });
+    window.addEventListener('contextmenu', () => { for (const k in keys) keys[k] = false; });
+
+    window.addEventListener('contextmenu', e => {
+      e.preventDefault();
+    });
+
+
+    const overlay = document.getElementById('gameOverOverlay');
+    let gameOverShown = false, surviveTime = 0, lastTouchCount = 0;
+
+    // --- Circle Class ---
+    class Circle {
+      constructor(x, y, r, isPlayer = false) {
+        this.x = x; this.y = y;
+        this.vx = 0; this.vy = 0;
+        this.r = r;
+        this.isPlayer = isPlayer;
+        this.falling = false;
+        this.touchedByPlayer = false;
+        this.glow = 0;
+        this.hue = 0;
+        this.baseSat = 0;
+        this.baseLight = 0;
+      }
+    }
+
+    // --- Setup Circles ---
+    const circles = [];
+    const PLAYER_RADIUS = 40;
+    const player = new Circle(0, 0, PLAYER_RADIUS, true);
+    circles.push(player);
+    const NUM_OPPONENTS = 15;
+
+    function initCircles() {
+      circles.length = 0;
+      circles.push(player);
+
+      // Assign the first neon hue to the player
+      const pCol = COLOR_PALETTE[0];
+      player.hue       = pCol.h;
+      player.baseSat   = pCol.s;
+      player.baseLight = pCol.l;
+
+      for (let i = 0; i < NUM_OPPONENTS; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist  = Math.random() * (initialMapRadius - 100);
+        const x = center.x + Math.cos(angle) * dist;
+        const y = center.y + Math.sin(angle) * dist;
+        const c = new Circle(x, y, PLAYER_RADIUS);
+
+        // Cycle through neon hues
+        const { h, s, l } = COLOR_PALETTE[(i + 1) % COLOR_PALETTE.length];
+        c.hue       = h;
+        c.baseSat   = s;
+        c.baseLight = l;
+
+        c.vx = (Math.random() - 0.5) * (200 / 6);
+        c.vy = (Math.random() - 0.5) * (200 / 6);
+
+        circles.push(c);
+      }
+
+      player.x = center.x;
+      player.y = center.y;
+      player.vx = player.vy = 0;
+      player.falling = false;
+      player.touchedByPlayer = false;
+
+      surviveTime = lastTouchCount = 0;
+      gameOverShown = false;
+      overlay.style.opacity = 0;
+      mapRadius = initialMapRadius;
+    }
+    initCircles();
+
+    // --- Physics & Glow (unchanged) ---
+    function resolveCircleCollision(a, b) {
+      if (a.falling || b.falling) return;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy);
+      if (!dist) return;
+      const overlap = a.r + b.r - dist;
+      if (overlap > 0) {
+        const nx = dx / dist, ny = dy / dist;
+        a.x -= nx * overlap / 2; b.x += nx * overlap / 2;
+        a.y -= ny * overlap / 2; b.y += ny * overlap / 2;
+        const rvx = b.vx - a.vx, rvy = b.vy - a.vy;
+        const velAlong = rvx * nx + rvy * ny;
+        if (velAlong > 0) return;
+        const impulse = -(1 + CIRCLE_RESTITUTION) * velAlong / 2;
+        a.vx -= impulse * nx; a.vy -= impulse * ny;
+        b.vx += impulse * nx; b.vy += impulse * ny;
+        const mag = Math.abs(impulse);
+        if (mag > GLOW_THRESHOLD) {
+          const glowStr = Math.min((mag - GLOW_THRESHOLD) / 40, 1);
+          a.glow = Math.max(a.glow, glowStr);
+          b.glow = Math.max(b.glow, glowStr);
+        }
+        if (a.isPlayer) b.touchedByPlayer = true;
+        if (b.isPlayer) a.touchedByPlayer = true;
+      }
+    }
+
+    // --- Game Loop & Rendering (unchanged) ---
+    let lastTime = performance.now();
+    function loop(now) {
+      const dt = Math.min((now - lastTime) / 1000, MAX_DT);
+      lastTime = now;
+      if (!gameOverShown) surviveTime += dt;
+      update(dt);
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    function update(dt) {
+      if (!gameOverShown) mapRadius = Math.max(0, mapRadius - mapShrinkSpeed * dt);
+      camera.x += (player.x - camera.x) * CAMERA_LAG * dt;
+      camera.y += (player.y - camera.y) * CAMERA_LAG * dt;
+
+      if (!player.falling) {
+        let ax = 0, ay = 0;
+        if (keys['w']||keys['arrowup'])    ay--;
+        if (keys['s']||keys['arrowdown'])  ay++;
+        if (keys['a']||keys['arrowleft'])  ax--;
+        if (keys['d']||keys['arrowright']) ax++;
+        if (ax||ay) {
+          const mag = Math.hypot(ax, ay);
+          const f = ACCEL * (keys,'shift' ? SPRINT_MULT : 1);
+          player.vx += (ax/mag)*f*dt;
+          player.vy += (ay/mag)*f*dt;
+        }
+      }
+
+      circles.forEach(c => {
+        c.vx -= c.vx * DRAG * dt;
+        c.vy -= c.vy * DRAG * dt;
+        c.x += c.vx * dt;
+        c.y += c.vy * dt;
+        const dx = c.x - center.x, dy = c.y - center.y;
+        const dist = Math.hypot(dx, dy);
+        if (!c.falling && dist > mapRadius) {
+          c.falling = true;
+          const nx = dx/dist, ny = dy/dist;
+          c.vx += nx * FALL_PUSH;
+          c.vy += ny * FALL_PUSH;
+          if (!c.isPlayer && c.touchedByPlayer) lastTouchCount++;
+        }
+        if (c.falling) c.r -= FALL_SHRINK_RATE * dt;
+        c.glow = Math.max(0, c.glow - GLOW_DECAY * dt);
+      });
+
+      for (let i = 0; i < circles.length; i++) {
+        for (let j = i + 1; j < circles.length; j++) {
+          resolveCircleCollision(circles[i], circles[j]);
+        }
+      }
+
+      for (let i = circles.length - 1; i >= 0; i--) {
+        if (circles[i].falling && circles[i].r <= 0) circles.splice(i, 1);
+      }
+
+      if (!gameOverShown && !player.falling && circles.length === 1 && circles[0].isPlayer) {
+        gameOverShown = true;
+        setTimeout(() => showOverlay(`You won!\nTime: ${Math.floor(surviveTime)} seconds.\nKnocked off: ${lastTouchCount} opponents.\n\nPress R to Restart.`), GAME_OVER_DELAY*1000);
+      }
+      if (!gameOverShown && player.falling) {
+        gameOverShown = true;
+        setTimeout(() => showOverlay(`You lost.\nTime: ${Math.floor(surviveTime)} seconds.\nKnocked off ${lastTouchCount} opponents.\n\nPress R to Restart.`), GAME_OVER_DELAY*1000);
+      }
+    }
+
+    function showOverlay(text) {
+      overlay.textContent = text;
+      overlay.style.pointerEvents = 'auto';
+      overlay.style.opacity = 1;
+    }
+
+    function draw() {
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.clearRect(0,0,width,height);
+      const viewWidth = mapRadius*2*1.9;
+      const scale = width / viewWidth;
+      ctx.setTransform(scale,0,0,scale,width/2 - camera.x*scale, height/2 - camera.y*scale);
+
+      // boundary
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, mapRadius, 0, Math.PI*2);
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 4/scale;
+      ctx.stroke();
+
+      // circles
+      circles.forEach(c => {
+        if (c.isPlayer && c.falling) {
+          const dx = c.x - center.x, dy = c.y - center.y;
+          if (Math.hypot(dx,dy) < mapRadius) return;
+        }
+        ctx.save();
+        const sat   = c.baseSat   + c.glow * SAT_BOOST;
+        const light = c.baseLight + c.glow * LIGHT_BOOST;
+        const fill  = `hsl(${c.hue}, ${sat}%, ${light}%)`;
+
+        if (c.glow > 0) {
+          ctx.shadowBlur  = c.glow * MAX_SHADOW_BLUR;
+          ctx.shadowColor = fill;
+        }
+
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, Math.max(0, c.r), 0, Math.PI*2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

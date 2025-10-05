@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Task Board Application
+    A modern, drag-and-drop task management system with three main sections:
+    - Current Focus (Now): Active tasks with timers
+    - Needs Doing (Soon): Upcoming tasks with timestamps
+    - Task Bank: Storage for all available tasks
+  -->
+  
+  <!-- Essential meta tags for proper rendering and SEO -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Now / Soon / Task Bank</title>
+  
+  <!-- Google Fonts: Fredoka for modern, friendly typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       CSS CUSTOM PROPERTIES (DESIGN SYSTEM)
+       ======================================== */
+    
+    :root {
+      /* === COLOR PALETTE === */
+      --bg: #0b0b12;           /* Main background: deep dark blue */
+      --panel: #141423;        /* Primary panel background: slightly lighter dark */
+      --panel-2: #10101a;      /* Secondary panel: darker variant for gradients */
+      --ink: #E8E8F4;          /* Primary text color: light purple-gray */
+      --ink-dim: #A8A8C9;      /* Secondary text: muted purple-gray */
+      --line: #23233a;         /* Border color: subtle dark purple */
+      
+      /* === ACCENT COLORS === */
+      --accent: #ff2bd6;       /* Primary accent: bright magenta */
+      --accent-dim: #b51698;   /* Dimmed accent: darker magenta */
+      
+      /* === LAYOUT DIMENSIONS === */
+      --row-h: 36px;           /* Standard row height for task items */
+      --head-h: 40px;          /* Header row height (slightly taller) */
+      
+      /* === VISUAL EFFECTS === */
+      --radius: 14px;          /* Border radius for rounded corners */
+      --shadow: 0 6px 20px rgba(0,0,0,.35);  /* Drop shadow for depth */
+    }
+    
+    /* ========================================
+       GLOBAL RESET & BASE STYLES
+       ======================================== */
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      /* Complex background with multiple radial gradients for depth */
+      background: 
+        radial-gradient(1200px 600px at 25% -10%, rgba(255,43,214,.06), transparent 40%),
+        radial-gradient(1000px 500px at 90% 0%, rgba(255,43,214,.04), transparent 35%),
+        var(--bg);
+      color: var(--ink);
+      font-family: 'Fredoka', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      letter-spacing: .2px;
+    }
+    
+    /* ========================================
+       TOP BAR COMPONENT
+       ======================================== */
+    
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 18px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    
+    .topbar .label {
+      color: var(--ink-dim);
+      opacity: .9;
+      user-select: none;
+      white-space: nowrap;
+    }
+    
+    /* ========================================
+       INPUT COMPONENTS
+       ======================================== */
+    
+    .task-input {
+      width: 18ch;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--accent);
+      caret-color: var(--accent);
+      font: 600 16px 'Fredoka', sans-serif;
+      padding: 6px 6px 4px;
+      border-bottom: 1px dashed transparent;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    
+    .task-input::placeholder {
+      color: rgba(255,255,255,.18);
+    }
+    
+    .task-input:focus {
+      border-bottom-color: rgba(255,43,214,.5);
+      box-shadow: 0 2px 0 -1px rgba(255,43,214,.35);
+    }
+    
+    .hint {
+      font-size: 12px;
+      color: rgba(255,255,255,.35);
+      margin-left: 6px;
+    }
+    
+    /* ========================================
+       MAIN BOARD LAYOUT
+       ======================================== */
+    
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;        /* Two equal columns */
+      grid-template-rows: auto auto;          /* Two rows */
+      gap: 14px;
+      padding: 14px 16px 20px;
+    }
+    
+    /* Task Bank spans full width (both columns) */
+    .board .list-card:last-child {
+      grid-column: 1/-1;
+    }
+    
+    /* ========================================
+       LIST CARD COMPONENTS
+       ======================================== */
+    
+    .list-card {
+      /* Layered gradients for depth and visual interest */
+      background: 
+        linear-gradient(180deg, rgba(255,43,214,.04), transparent 22%),
+        linear-gradient(140deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 10px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;  /* Prevents flex items from overflowing */
+    }
+    
+    .list-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font: 700 16px 'Fredoka', sans-serif;
+      letter-spacing: .3px;
+      margin: 2px 6px 8px;
+      color: #fff;
+    }
+    
+    .list-title .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      /* Radial gradient for glowing effect */
+      background: radial-gradient(circle at 30% 30%, var(--accent), var(--accent-dim));
+      box-shadow: 0 0 10px rgba(255,43,214,.6);
+    }
+    
+    /* ========================================
+       TABLE CONTAINER & SCROLLING
+       ======================================== */
+    
+    .table-wrap {
+      /* Fixed height to show exactly 8 rows + header */
+      height: calc(var(--head-h) + var(--row-h) * 8);
+      overflow: auto;
+      border-radius: 10px;
+      border: 1px dashed rgba(255,255,255,.06);
+      position: relative;
+      /* Subtle gradient overlay */
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+    }
+    
+    /* Custom scrollbar styling */
+    .table-wrap::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: #2a2a46;
+      border-radius: 8px;
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: #343463;
+    }
+    
+    /* ========================================
+       TABLE STRUCTURE
+       ======================================== */
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;  /* Ensures consistent column widths */
+      font-size: 14px;
+    }
+    
+    /* Sticky header with backdrop blur */
+    thead th {
+      position: sticky;
+      top: 0;
+      text-align: left;
+      font-weight: 700;
+      height: var(--head-h);
+      padding: 8px 12px;
+      background: rgba(20,20,35,.85);
+      backdrop-filter: blur(2px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      z-index: 2;
+    }
+    
+    /* Table body cells - no interior borders for clean look */
+    tbody td {
+      height: var(--row-h);
+      padding: 6px 12px;
+      vertical-align: middle;
+      border-bottom: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    
+    /* ========================================
+       TASK ROW INTERACTIONS
+       ======================================== */
+    
+    .task-row {
+      cursor: grab;
+    }
+    
+    .task-row:active {
+      cursor: grabbing;
+    }
+    
+    /* ========================================
+       TASK CHIP COMPONENT
+       ======================================== */
+    
+    .task-chip {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--ink);
+      font-weight: 400;
+      letter-spacing: .2px;
+      /* Layered shadows for depth */
+      box-shadow: 
+        0 0 8px rgba(255,255,255,.06) inset,
+        0 0 0 1px rgba(0,0,0,.08);
+    }
+    
+    /* ========================================
+       DRAG & DROP STATES
+       ======================================== */
+    
+    .dragging {
+      opacity: .65;
+      filter: saturate(1.1);
+    }
+    
+    /* Empty row placeholders for drop zones */
+    .empty-row td {
+      color: rgba(255,255,255,.16);
+      border-bottom: none;
+      position: relative;
+    }
+    
+    .empty-row td::after {
+      content: none;
+    }
+    
+    .empty-row:hover td {
+      background: rgba(255,43,214,.03);
+    }
+    
+    /* Active drop zone styling */
+    .table-wrap.dropzone {
+      border: 1px dashed rgba(255,43,214,.4) !important;
+    }
+    
+    /* ========================================
+       HEADER INPUT STYLING
+       ======================================== */
+    
+    thead th .task-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--ink);
+      font: 400 16px 'Fredoka', sans-serif;
+      padding: 8px 12px;
+      text-align: left;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    thead th .task-input::placeholder {
+      color: rgba(255,255,255,.4);
+    }
+    
+    /* ========================================
+       TASK BANK LAYOUT
+       ======================================== */
+    
+    .bank-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;  /* No gap to prevent undroppable boundaries */
+      padding: 0 8px 8px;
+    }
+    
+    /* ========================================
+       TIMER ANIMATIONS
+       ======================================== */
+    
+    .timer-done {
+      color: #fff;
+      animation: blink 1s steps(2, start) infinite;
+    }
+    
+    @keyframes blink {
+      to { opacity: .25; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 
+    ========================================
+    MAIN APPLICATION LAYOUT
+    ========================================
+    The board uses CSS Grid with 2 columns and 2 rows:
+    - Row 1: Current Focus (left) + Needs Doing (right)
+    - Row 2: Task Bank (spans full width)
+  -->
+  
+  <main class="board">
+    
+    <!-- ========================================
+         CURRENT FOCUS SECTION (NOW)
+         ========================================
+         Displays active tasks with countdown timers.
+         Tasks moved here get a 30-minute timer.
+    -->
+    <section class="list-card" data-list="now">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Current Focus
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:80px">⏱️</th>  <!-- Timer column -->
+              <th>Task</th>                    <!-- Task content column -->
+            </tr>
+          </thead>
+          <tbody id="now-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         NEEDS DOING SECTION (SOON)
+         ========================================
+         Shows upcoming tasks with timestamps.
+         Tasks moved here get timestamped with current time.
+    -->
+    <section class="list-card" data-list="soon">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Needs Doing
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:84px">Added</th>  <!-- Timestamp column -->
+              <th>Task</th>                      <!-- Task content column -->
+            </tr>
+          </thead>
+          <tbody id="soon-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         TASK BANK SECTION
+         ========================================
+         Storage area for all available tasks.
+         Features:
+         - Input field for adding new tasks
+         - Three-column layout for better space utilization
+         - Drag-and-drop source for moving tasks to other sections
+    -->
+    <section class="list-card" data-list="bank">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Task Bank
+      </div>
+      
+      <div class="table-wrap">
+        <!-- Input header for adding new tasks -->
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th colspan="3">
+                <input 
+                  id="newTask" 
+                  class="task-input" 
+                  type="text" 
+                  maxlength="120" 
+                  placeholder="Add task" 
+                  autocomplete="off" 
+                />
+              </th>
+            </tr>
+          </thead>
+        </table>
+        
+        <!-- Three-column layout for task distribution -->
+        <div class="bank-columns">
+          <table class="task-table">
+            <tbody id="bank-col1-body">
+              <!-- Column 1 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col2-body">
+              <!-- Column 2 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col3-body">
+              <!-- Column 3 tasks -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  <script>
+    /* ========================================
+       DOM MANIPULATION UTILITIES
+       ======================================== */
+    
+    /**
+     * Shorthand for document.getElementById
+     * @param {string} id - Element ID to select
+     * @returns {HTMLElement|null} The element or null if not found
+     */
+    const $ = id => document.getElementById(id);
+    
+    /**
+     * Creates a DOM element with attributes and children
+     * @param {string} tag - HTML tag name
+     * @param {Object} attrs - Element attributes (style, dataset, etc.)
+     * @param {Array} kids - Child elements to append
+     * @returns {HTMLElement} The created element
+     */
+    const el = (tag, attrs = {}, kids = []) => {
+      const n = document.createElement(tag);
+      
+      // Apply attributes with special handling for style and dataset
+      for (const k in attrs) {
+        if (k === 'style') {
+          Object.assign(n.style, attrs.style);
+        } else if (k === 'dataset') {
+          Object.assign(n.dataset, attrs.dataset);
+        } else {
+          n[k] = attrs[k];
+        }
+      }
+      
+      // Append all child elements
+      kids.forEach(ch => n.appendChild(ch));
+      return n;
+    };
+    
+    /**
+     * Replaces all children of a node with new children
+     * @param {Node} node - Parent node
+     * @param {Array} children - New child elements
+     */
+    const replace = (node, children) => node.replaceChildren(...children);
+
+    /* ========================================
+       COLOR SYSTEM
+       ======================================== */
+    
+    /**
+     * Predefined color palette for task chips
+     * Each task gets a random color for visual distinction
+     */
+    const COLORS = [
+      '#ff0550',  // Bright red
+      '#27f1c2',  // Cyan
+      '#5938ff',  // Purple
+      '#ffdd00'   // Yellow
+    ];
+    
+    /**
+     * Returns a random color from the COLORS array
+     * @returns {string} Random hex color
+     */
+    const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    /* ========================================
+       APPLICATION STATE
+       ======================================== */
+    
+    /**
+     * Main application state object
+     * - tasks: Object mapping task IDs to task data
+     * - lists: Arrays of task IDs for each section (now, soon, bank)
+     */
+    const state = {
+      tasks: {},                    // Task storage: {id: {text, textColor, addedSoonAt, nowEndAt}}
+      lists: {
+        now: [],                    // Current focus tasks
+        soon: [],                   // Upcoming tasks
+        bank: []                    // Available tasks
+      }
+    };
+    
+    /**
+     * Minimum number of visible rows in each table
+     * Ensures consistent layout even with few tasks
+     */
+    const MIN_VISIBLE_ROWS = 8;
+
+    /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+    
+    /**
+     * Cached references to frequently used DOM elements
+     * Improves performance by avoiding repeated getElementById calls
+     */
+    const els = {
+      input: $('newTask'),                    // New task input field
+      bodies: {
+        now: $('now-body'),                   // Current focus table body
+        soon: $('soon-body'),                 // Needs doing table body
+        bankCol1: $('bank-col1-body'),        // Task bank column 1
+        bankCol2: $('bank-col2-body'),        // Task bank column 2
+        bankCol3: $('bank-col3-body')         // Task bank column 3
+      }
+    };
+
+    /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+    
+    /**
+     * Generates a unique ID for tasks
+     * Format: 't' + timestamp + random string
+     * @returns {string} Unique task ID
+     */
+    const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    /* ========================================
+       TASK MANAGEMENT FUNCTIONS
+       ======================================== */
+    
+    /**
+     * Adds a new task to the task bank
+     * @param {string} text - Task description text
+     */
+    function addTaskToBank(text) {
+      const id = uid();
+      
+      // Create task object with trimmed text and random color
+      state.tasks[id] = {
+        text: text.trim(),
+        textColor: randomColor()
+      };
+      
+      // Add to bank list and re-render
+      state.lists.bank.push(id);
+      renderAll();
+    }
+
+    /**
+     * Creates a task chip element with per-task styling
+     * @param {string} id - Task ID
+     * @returns {HTMLElement} Task chip span element
+     */
+    const chipFor = id => {
+      const t = state.tasks[id];
+      
+      // Handle missing task gracefully
+      if (!t) {
+        console.warn(`Task with id ${id} not found in state.tasks`);
+        return el('span', {
+          className: 'task-chip',
+          textContent: '[Task not found]'
+        });
+      }
+      
+      // Create chip with task-specific color
+      const s = el('span', { className: 'task-chip' });
+      s.textContent = t.text;
+      s.style.color = t.textColor || '#E8E8F4';
+      return s;
+    };
+
+    /* ========================================
+       TIME FORMATTING UTILITIES
+       ======================================== */
+    
+    /**
+     * Checks if two dates are on the same day
+     * @param {Date} a - First date
+     * @param {Date} b - Second date
+     * @returns {boolean} True if same day
+     */
+    const sameDay = (a, b) => 
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+    
+    /**
+     * Formats timestamp for "Soon" section display
+     * Shows time if today, date if different day
+     * @param {number} ms - Timestamp in milliseconds
+     * @returns {string} Formatted time or date string
+     */
+    const formatSoon = ms => {
+      const d = new Date(ms);
+      const now = new Date();
+      
+      return sameDay(d, now) 
+        ? d.toLocaleTimeString([], { hour: 'numeric' })           // "2 PM"
+        : d.toLocaleDateString([], { month: 'numeric', day: 'numeric' }); // "12/25"
+    };
+
+    /* ========================================
+       RENDERING SYSTEM
+       ======================================== */
+    
+    /**
+     * Re-renders all sections of the application
+     * Called whenever state changes
+     */
+    function renderAll() {
+      renderList('now');
+      renderList('soon');
+      renderBank();
+    }
+
+    /**
+     * Renders a specific list section (now or soon)
+     * @param {string} listId - List identifier ('now' or 'soon')
+     */
+    function renderList(listId) {
+      const body = els.bodies[listId];
+      const ids = state.lists[listId];
+      
+      // Create task rows with proper data and drag-drop functionality
+      const rows = ids.map((id, index) => {
+        // Validate task exists to prevent null reference errors
+        if (!state.tasks[id]) {
+          console.warn(`Task with id ${id} not found in state.tasks`);
+          return null;
+        }
+        
+        // Create first column cell (timer or timestamp)
+        const tdA = el('td');
+        
+        if (listId === 'soon') {
+          // Show timestamp when task was added to "soon"
+          const ts = state.tasks[id].addedSoonAt;
+          tdA.textContent = ts ? formatSoon(ts) : '—';
+        }
+        
+        if (listId === 'now') {
+          // Show countdown timer for "now" tasks
+          const end = state.tasks[id].nowEndAt;
+          if (end) {
+            const rem = end - Date.now();
+            if (rem <= 0) {
+              tdA.textContent = '00:00:00';
+              tdA.classList.add('timer-done');  // Blinking animation
+            } else {
+              tdA.textContent = formatMMSS(rem);
+              tdA.classList.remove('timer-done');
+            }
+          } else {
+            tdA.textContent = '';
+          }
+        }
+        
+        // Create complete table row with drag-drop capabilities
+        const tr = el('tr', {
+          className: 'task-row',
+          draggable: true,
+          dataset: { taskId: id, listId, index }
+        }, [
+          tdA,
+          el('td', {}, [chipFor(id)])  // Task chip in second column
+        ]);
+        
+        attachRowDnD(tr);
+        return tr;
+      }).filter(row => row !== null); // Remove null entries from failed task lookups
+      
+      // Add placeholder rows to maintain consistent layout
+      const placeholders = Math.max(MIN_VISIBLE_ROWS - ids.length, 0);
+      for (let i = 0; i < placeholders; i++) {
+        const ph = el('tr', {
+          className: 'empty-row',
+          dataset: { listId }
+        }, [el('td'), el('td')]);
+        attachDropToRow(ph);
+        rows.push(ph);
+      }
+      
+      // Attach drop zone to table body and update DOM
+      attachDropToTbody(body);
+      replace(body, rows);
+    }
+
+    /**
+     * Renders the task bank with three-column layout
+     * Distributes tasks evenly across columns for better space utilization
+     */
+    function renderBank() {
+      const ids = state.lists.bank;
+      const columns = [[], [], []]; // Initialize 3 empty columns
+      
+      // Distribute tasks across columns using round-robin
+      ids.forEach((id, i) => columns[i % 3].push(id));
+      
+      /**
+       * Paints a single column with tasks and placeholders
+       * @param {HTMLElement} bodyEl - Table body element for this column
+       * @param {Array} colIds - Task IDs for this column
+       * @param {number} colIndex - Column index (0, 1, or 2)
+       */
+      const paint = (bodyEl, colIds, colIndex) => {
+        // Create task rows for this column
+        const nodes = colIds.map((id, i) => {
+          // Calculate actual index in the bank array for proper drag-drop positioning
+          const index = colIndex + i * 3;
+          
+          const tr = el('tr', {
+            className: 'task-row',
+            draggable: true,
+            dataset: { taskId: id, listId: 'bank', index }
+          }, [
+            el('td', {}, [chipFor(id)])  // Single column for task chips
+          ]);
+          
+          attachRowDnD(tr);
+          return tr;
+        });
+        
+        // Add placeholder rows to maintain consistent layout
+        const placeholders = Math.max(MIN_VISIBLE_ROWS - colIds.length, 0);
+        for (let i = 0; i < placeholders; i++) {
+          const ph = el('tr', {
+            className: 'empty-row',
+            dataset: { listId: 'bank' }
+          }, [el('td')]);
+          attachDropToRow(ph);
+          nodes.push(ph);
+        }
+        
+        // Attach drop zone and update DOM
+        attachDropToTbody(bodyEl);
+        replace(bodyEl, nodes);
+      };
+      
+      // Render each column
+      paint(els.bodies.bankCol1, columns[0], 0);
+      paint(els.bodies.bankCol2, columns[1], 1);
+      paint(els.bodies.bankCol3, columns[2], 2);
+    }
+
+    /* ========================================
+       DRAG & DROP SYSTEM
+       ======================================== */
+    
+    /**
+     * Global drag data storage
+     * Contains information about the currently dragged task
+     */
+    let dragData = null;
+    
+    /**
+     * Extracts list ID from table body element ID
+     * @param {string} id - Table body element ID
+     * @returns {string|null} List identifier or null
+     */
+    const getList = id => 
+      id ? (id.startsWith('bank-') ? 'bank' : id.replace('-body', '')) : null;
+    
+    /**
+     * Calculates the correct drop index for bank columns
+     * Accounts for the three-column layout when determining position
+     * @param {HTMLElement} tr - Table row element
+     * @returns {number} Calculated index in the bank array
+     */
+    function bankDropIndexFromRow(tr) {
+      const tbodyId = tr.closest('tbody').id;
+      const colMatch = tbodyId.match(/bank-col(\d+)-body/);
+      
+      if (!colMatch) return 0;
+      
+      const colIndex = parseInt(colMatch[1]) - 1; // Convert to 0-based index
+      let realIndex = 0;
+      
+      // Count actual task rows before this position
+      for (const c of tr.parentElement.children) {
+        if (c === tr) break;
+        if (c.classList.contains('task-row')) realIndex++;
+      }
+      
+      // Calculate actual index in bank array (accounts for column distribution)
+      return colIndex + realIndex * 3;
+    }
+    
+    /**
+     * Clears all drag and drop visual indicators
+     * Removes dropzone styling and drop-before classes
+     */
+    const clearDnD = () => {
+      document.querySelectorAll('.table-wrap').forEach(tw => 
+        tw.classList.remove('dropzone')
+      );
+      document.querySelectorAll('tr.drop-before').forEach(el => 
+        el.classList.remove('drop-before')
+      );
+    };
+
+    /**
+     * Attaches drag and drop event listeners to task rows
+     * @param {HTMLElement} tr - Table row element
+     */
+    function attachRowDnD(tr) {
+      // Start dragging: store drag data and set visual state
+      tr.addEventListener('dragstart', e => {
+        const { taskId, listId, index } = tr.dataset;
+        dragData = { taskId, fromList: listId, fromIndex: Number(index) };
+        tr.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', taskId);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      
+      // End dragging: cleanup visual state and drag data
+      tr.addEventListener('dragend', () => {
+        tr.classList.remove('dragging');
+        clearDnD();
+        dragData = null;
+      });
+      
+      // Dragover: show drop indicators
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        document.querySelectorAll('tr.drop-before').forEach(el => 
+          el.classList.remove('drop-before')
+        );
+        tr.classList.add('drop-before');
+      });
+      
+      // Drag leave: remove drop indicator
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      // Drop: handle the actual task move
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const tbody = tr.closest('tbody');
+        const toList = getList(tbody.id);
+        const beforeIndex = (toList === 'bank') 
+          ? bankDropIndexFromRow(tr) 
+          : Array.from(tr.parentElement.children).indexOf(tr);
+        
+        moveTask(dragData.taskId, dragData.fromList, toList, beforeIndex);
+        dragData = null;
+      });
+    }
+
+    /**
+     * Attaches drop event listeners to placeholder rows
+     * @param {HTMLElement} tr - Placeholder table row element
+     */
+    function attachDropToRow(tr) {
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(tr.closest('tbody').id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    /**
+     * Attaches drop event listeners to table bodies
+     * Prevents duplicate binding with dataset flag
+     * @param {HTMLElement} tbody - Table body element
+     */
+    function attachDropToTbody(tbody) {
+      if (tbody.dataset.bound === '1') return;
+      tbody.dataset.bound = '1';
+      
+      tbody.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tbody.closest('.table-wrap').classList.add('dropzone');
+      });
+      
+      tbody.addEventListener('dragleave', () => 
+        tbody.closest('.table-wrap').classList.remove('dropzone')
+      );
+      
+      tbody.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(e.currentTarget.id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    /**
+     * Moves a task between lists with proper state management
+     * @param {string} taskId - ID of task to move
+     * @param {string} fromList - Source list identifier
+     * @param {string} toList - Destination list identifier
+     * @param {number} beforeIndex - Position to insert at (Infinity for end)
+     */
+    function moveTask(taskId, fromList, toList, beforeIndex) {
+      clearDnD();
+      if (!taskId || !fromList || !toList) return;
+      
+      // Validate task exists before attempting to move
+      if (!state.tasks[taskId]) {
+        console.warn(`Cannot move task with id ${taskId} - task not found in state.tasks`);
+        return;
+      }
+      
+      // Remove from source list
+      const fromArr = state.lists[fromList];
+      const i = fromArr.indexOf(taskId);
+      if (i > -1) fromArr.splice(i, 1);
+      
+      // Add to destination list
+      const toArr = state.lists[toList];
+      
+      // Set timestamp when moved to "soon"
+      if (toList === 'soon' && !state.tasks[taskId].addedSoonAt) {
+        state.tasks[taskId].addedSoonAt = Date.now();
+      }
+      
+      // Set timer when moved to "now" (30 minutes)
+      if (toList === 'now') {
+        state.tasks[taskId].nowEndAt = Date.now() + 30 * 60 * 1000;
+        ensureNowInterval();
+      }
+      
+      // Calculate insertion position
+      const dest = Number.isFinite(beforeIndex) 
+        ? Math.min(Math.max(0, beforeIndex), toArr.length) 
+        : toArr.length;
+      
+      // Insert task if not already present
+      if (!toArr.includes(taskId)) {
+        toArr.splice(dest, 0, taskId);
+      }
+      
+      renderAll();
+    }
+
+    /* ========================================
+       TIMER SYSTEM FOR "NOW" TASKS
+       ======================================== */
+    
+    /**
+     * Global timer interval for updating "now" task countdowns
+     */
+    let nowInterval = null;
+    
+    /**
+     * Ensures timer interval is running when "now" tasks exist
+     * Automatically starts/stops based on task presence
+     */
+    function ensureNowInterval() {
+      if (!nowInterval) {
+        nowInterval = setInterval(() => {
+          if (state.lists.now.length) {
+            renderList('now');  // Update timer displays
+          } else {
+            clearInterval(nowInterval);
+            nowInterval = null;
+          }
+        }, 1000);
+      }
+    }
+    
+    /**
+     * Clears the timer interval and resets reference
+     * Prevents memory leaks and unnecessary updates
+     */
+    function clearNowInterval() {
+      if (nowInterval) {
+        clearInterval(nowInterval);
+        nowInterval = null;
+      }
+    }
+    
+    // Cleanup on page unload to prevent memory leaks
+    window.addEventListener('beforeunload', clearNowInterval);
+    
+    /**
+     * Pads numbers with leading zeros for consistent formatting
+     * @param {number} n - Number to pad
+     * @returns {string} Zero-padded string
+     */
+    const pad = n => String(n).padStart(2, '0');
+    
+    /**
+     * Formats milliseconds as MM:SS countdown timer
+     * @param {number} ms - Milliseconds remaining
+     * @returns {string} Formatted time string (e.g., "05:30")
+     */
+    function formatMMSS(ms) {
+      const sec = Math.ceil(ms / 1000);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${pad(m)}:${pad(s)}`;
+    }
+
+    /* ========================================
+       INPUT HANDLING
+       ======================================== */
+    
+    /**
+     * Handles new task input with Enter key
+     * Creates task and clears input field
+     */
+    els.input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const v = els.input.value.trim();
+        if (v) {
+          addTaskToBank(v);
+          els.input.value = '';
+        }
+      }
+    });
+
+    /* ========================================
+       APPLICATION INITIALIZATION
+       ======================================== */
+    
+    /**
+     * Initializes the application
+     * Renders all sections with current state
+     */
+    function init() {
+      renderAll();
+    }
+    
+    // Wait for DOM to be ready before initializing
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+  </script>
+</body>
+</html>

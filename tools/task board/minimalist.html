@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Minimalist Task Board Application
+    A clean, Japanese-inspired task management system with zen-like simplicity,
+    monochrome palette, and abundant whitespace.
+  -->
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zen Tasks</title>
+  
+  <!-- Google Fonts: Inter for clean sans-serif, and Noto Sans JP for Japanese aesthetic -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       MINIMALIST DESIGN SYSTEM
+       ======================================== */
+    
+    :root {
+      /* === MINIMALIST COLOR PALETTE === */
+      --bg: #fafafa;           /* Pure white background */
+      --panel: #ffffff;        /* Clean white panels */
+      --panel-2: #f8f8f8;      /* Subtle gray for depth */
+      --ink: #2a2a2a;          /* Deep charcoal text */
+      --ink-dim: #666666;      /* Muted gray text */
+      --line: #e0e0e0;         /* Light gray borders */
+      
+      /* === MINIMALIST ACCENTS === */
+      --accent: #000000;       /* Pure black accent */
+      --accent-dim: #333333;   /* Dark gray */
+      --highlight: #f5f5f5;    /* Subtle highlight */
+      
+      /* === LAYOUT DIMENSIONS === */
+      --row-h: 48px;           /* Generous row height */
+      --head-h: 56px;          /* Spacious headers */
+      
+      /* === MINIMALIST EFFECTS === */
+      --radius: 8px;           /* Subtle rounded corners */
+      --shadow: 0 2px 8px rgba(0,0,0,.04);  /* Very subtle shadow */
+    }
+    
+    /* ========================================
+       GLOBAL RESET & MINIMALIST BASE
+       ======================================== */
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: -.01em;
+      line-height: 1.6;
+    }
+    
+    /* ========================================
+       MINIMALIST TOP BAR
+       ======================================== */
+    
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px 32px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    
+    .topbar .label {
+      color: var(--ink-dim);
+      font-size: 14px;
+      font-weight: 400;
+      opacity: .8;
+      user-select: none;
+      white-space: nowrap;
+      letter-spacing: .05em;
+    }
+    
+    /* ========================================
+       MINIMALIST INPUT COMPONENTS
+       ======================================== */
+    
+    .task-input {
+      width: 24ch;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--accent);
+      caret-color: var(--accent);
+      font: 400 16px 'Inter', sans-serif;
+      padding: 8px 0 6px;
+      border-bottom: 1px solid transparent;
+      transition: border-color .2s ease;
+    }
+    
+    .task-input::placeholder {
+      color: var(--ink-dim);
+      opacity: .6;
+    }
+    
+    .task-input:focus {
+      border-bottom-color: var(--accent);
+    }
+    
+    .hint {
+      font-size: 12px;
+      color: var(--ink-dim);
+      margin-left: 8px;
+      opacity: .7;
+    }
+    
+    /* ========================================
+       MINIMALIST BOARD LAYOUT
+       ======================================== */
+    
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 24px;
+      padding: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .board .list-card:last-child {
+      grid-column: 1/-1;
+    }
+    
+    /* ========================================
+       MINIMALIST LIST CARDS
+       ======================================== */
+    
+    .list-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      transition: box-shadow .2s ease;
+    }
+    
+    .list-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+    
+    .list-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font: 500 18px 'Inter', sans-serif;
+      letter-spacing: -.02em;
+      margin: 0 0 20px;
+      color: var(--ink);
+    }
+    
+    .list-title .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    
+    /* ========================================
+       MINIMALIST TABLE CONTAINER
+       ======================================== */
+    
+    .table-wrap {
+      height: calc(var(--head-h) + var(--row-h) * 8);
+      overflow: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      position: relative;
+      background: var(--panel);
+    }
+    
+    .table-wrap::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 6px;
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: var(--ink-dim);
+    }
+    
+    /* ========================================
+       MINIMALIST TABLE STRUCTURE
+       ======================================== */
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 15px;
+    }
+    
+    thead th {
+      position: sticky;
+      top: 0;
+      text-align: left;
+      font-weight: 500;
+      height: var(--head-h);
+      padding: 16px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      z-index: 2;
+      font-family: 'Inter', sans-serif;
+      color: var(--ink-dim);
+      font-size: 13px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    
+    tbody td {
+      height: var(--row-h);
+      padding: 12px 20px;
+      vertical-align: middle;
+      border-bottom: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    
+    /* ========================================
+       MINIMALIST TASK ROWS
+       ======================================== */
+    
+    .task-row {
+      cursor: grab;
+      transition: background-color .15s ease;
+    }
+    
+    .task-row:hover {
+      background: var(--highlight);
+    }
+    
+    .task-row:active {
+      cursor: grabbing;
+    }
+    
+    /* ========================================
+       MINIMALIST TASK CHIPS
+       ======================================== */
+    
+    .task-chip {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--highlight);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-weight: 400;
+      letter-spacing: -.01em;
+      transition: all .15s ease;
+    }
+    
+    .task-chip:hover {
+      background: var(--accent);
+      color: var(--panel);
+      border-color: var(--accent);
+    }
+    
+    /* ========================================
+       MINIMALIST DRAG & DROP STATES
+       ======================================== */
+    
+    .dragging {
+      opacity: .5;
+    }
+    
+    .empty-row td {
+      color: var(--ink-dim);
+      border-bottom: none;
+      position: relative;
+      opacity: .4;
+    }
+    
+    .empty-row:hover td {
+      background: var(--highlight);
+      opacity: .6;
+    }
+    
+    .table-wrap.dropzone {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    
+    /* ========================================
+       MINIMALIST HEADER INPUT
+       ======================================== */
+    
+    thead th .task-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--ink);
+      font: 400 15px 'Inter', sans-serif;
+      padding: 16px 20px;
+      text-align: left;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    thead th .task-input::placeholder {
+      color: var(--ink-dim);
+      opacity: .6;
+    }
+    
+    /* ========================================
+       MINIMALIST TASK BANK LAYOUT
+       ======================================== */
+    
+    .bank-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      padding: 0 12px 12px;
+    }
+    
+    /* ========================================
+       MINIMALIST TIMER ANIMATIONS
+       ======================================== */
+    
+    .timer-done {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    
+    /* ========================================
+       MINIMALIST RESPONSIVE DESIGN
+       ======================================== */
+    
+    @media (max-width: 768px) {
+      .board {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px;
+      }
+      
+      .board .list-card:last-child {
+        grid-column: 1;
+      }
+      
+      .bank-columns {
+        grid-template-columns: 1fr;
+      }
+      
+      .topbar {
+        padding: 16px 20px 12px;
+      }
+      
+      .list-card {
+        padding: 16px;
+      }
+    }
+    
+    /* ========================================
+       MINIMALIST FOCUS STATES
+       ======================================== */
+    
+    .task-input:focus,
+    .task-row:focus,
+    .list-card:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    
+    /* ========================================
+       MINIMALIST ANIMATIONS
+       ======================================== */
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .list-card {
+      animation: fadeIn .3s ease-out;
+    }
+    
+    .task-row {
+      animation: fadeIn .2s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <main class="board">
+    
+    <!-- ========================================
+         MINIMALIST CURRENT FOCUS SECTION
+         ======================================== -->
+    <section class="list-card" data-list="now">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Focus
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:80px">Time</th>
+              <th>Task</th>
+            </tr>
+          </thead>
+          <tbody id="now-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         MINIMALIST NEEDS DOING SECTION
+         ======================================== -->
+    <section class="list-card" data-list="soon">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Next
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:80px">Added</th>
+              <th>Task</th>
+            </tr>
+          </thead>
+          <tbody id="soon-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         MINIMALIST TASK BANK SECTION
+         ======================================== -->
+    <section class="list-card" data-list="bank">
+      <div class="list-title">
+        <span class="dot"></span> 
+        Tasks
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th colspan="3">
+                <input 
+                  id="newTask" 
+                  class="task-input" 
+                  type="text" 
+                  maxlength="120" 
+                  placeholder="Add a new task..." 
+                  autocomplete="off" 
+                />
+              </th>
+            </tr>
+          </thead>
+        </table>
+        
+        <div class="bank-columns">
+          <table class="task-table">
+            <tbody id="bank-col1-body">
+              <!-- Column 1 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col2-body">
+              <!-- Column 2 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col3-body">
+              <!-- Column 3 tasks -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  <script>
+    /* ========================================
+       DOM MANIPULATION UTILITIES
+       ======================================== */
+    
+    const $ = id => document.getElementById(id);
+    
+    const el = (tag, attrs = {}, kids = []) => {
+      const n = document.createElement(tag);
+      
+      for (const k in attrs) {
+        if (k === 'style') {
+          Object.assign(n.style, attrs.style);
+        } else if (k === 'dataset') {
+          Object.assign(n.dataset, attrs.dataset);
+        } else {
+          n[k] = attrs[k];
+        }
+      }
+      
+      kids.forEach(ch => n.appendChild(ch));
+      return n;
+    };
+    
+    const replace = (node, children) => node.replaceChildren(...children);
+
+    /* ========================================
+       MINIMALIST COLOR SYSTEM
+       ======================================== */
+    
+    const COLORS = [
+      '#2a2a2a',  // Charcoal
+      '#666666',  // Medium gray
+      '#999999',  // Light gray
+      '#333333',  // Dark gray
+      '#4a4a4a',  // Slate
+      '#1a1a1a'   // Near black
+    ];
+    
+    const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    /* ========================================
+       APPLICATION STATE
+       ======================================== */
+    
+    const state = {
+      tasks: {},
+      lists: {
+        now: [],
+        soon: [],
+        bank: []
+      }
+    };
+    
+    const MIN_VISIBLE_ROWS = 8;
+
+    /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+    
+    const els = {
+      input: $('newTask'),
+      bodies: {
+        now: $('now-body'),
+        soon: $('soon-body'),
+        bankCol1: $('bank-col1-body'),
+        bankCol2: $('bank-col2-body'),
+        bankCol3: $('bank-col3-body')
+      }
+    };
+
+    /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+    
+    const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    /* ========================================
+       TASK MANAGEMENT FUNCTIONS
+       ======================================== */
+    
+    function addTaskToBank(text) {
+      const id = uid();
+      
+      state.tasks[id] = {
+        text: text.trim(),
+        textColor: randomColor()
+      };
+      
+      state.lists.bank.push(id);
+      renderAll();
+    }
+
+    const chipFor = id => {
+      const t = state.tasks[id];
+      
+      if (!t) {
+        console.warn(`Task with id ${id} not found in state.tasks`);
+        return el('span', {
+          className: 'task-chip',
+          textContent: '[Task not found]'
+        });
+      }
+      
+      const s = el('span', { className: 'task-chip' });
+      s.textContent = t.text;
+      s.style.color = t.textColor || '#2a2a2a';
+      return s;
+    };
+
+    /* ========================================
+       TIME FORMATTING UTILITIES
+       ======================================== */
+    
+    const sameDay = (a, b) => 
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+    
+    const formatSoon = ms => {
+      const d = new Date(ms);
+      const now = new Date();
+      
+      return sameDay(d, now) 
+        ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+        : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    };
+
+    /* ========================================
+       RENDERING SYSTEM
+       ======================================== */
+    
+    function renderAll() {
+      renderList('now');
+      renderList('soon');
+      renderBank();
+    }
+
+    function renderList(listId) {
+      const body = els.bodies[listId];
+      const ids = state.lists[listId];
+      
+      const rows = ids.map((id, index) => {
+        if (!state.tasks[id]) {
+          console.warn(`Task with id ${id} not found in state.tasks`);
+          return null;
+        }
+        
+        const tdA = el('td');
+        
+        if (listId === 'soon') {
+          const ts = state.tasks[id].addedSoonAt;
+          tdA.textContent = ts ? formatSoon(ts) : '—';
+        }
+        
+        if (listId === 'now') {
+          const end = state.tasks[id].nowEndAt;
+          if (end) {
+            const rem = end - Date.now();
+            if (rem <= 0) {
+              tdA.textContent = '00:00';
+              tdA.classList.add('timer-done');
+            } else {
+              tdA.textContent = formatMMSS(rem);
+              tdA.classList.remove('timer-done');
+            }
+          } else {
+            tdA.textContent = '';
+          }
+        }
+        
+        const tr = el('tr', {
+          className: 'task-row',
+          draggable: true,
+          dataset: { taskId: id, listId, index }
+        }, [
+          tdA,
+          el('td', {}, [chipFor(id)])
+        ]);
+        
+        attachRowDnD(tr);
+        return tr;
+      }).filter(row => row !== null);
+      
+      const placeholders = Math.max(MIN_VISIBLE_ROWS - ids.length, 0);
+      for (let i = 0; i < placeholders; i++) {
+        const ph = el('tr', {
+          className: 'empty-row',
+          dataset: { listId }
+        }, [el('td'), el('td')]);
+        attachDropToRow(ph);
+        rows.push(ph);
+      }
+      
+      attachDropToTbody(body);
+      replace(body, rows);
+    }
+
+    function renderBank() {
+      const ids = state.lists.bank;
+      const columns = [[], [], []];
+      
+      ids.forEach((id, i) => columns[i % 3].push(id));
+      
+      const paint = (bodyEl, colIds, colIndex) => {
+        const nodes = colIds.map((id, i) => {
+          const index = colIndex + i * 3;
+          
+          const tr = el('tr', {
+            className: 'task-row',
+            draggable: true,
+            dataset: { taskId: id, listId: 'bank', index }
+          }, [
+            el('td', {}, [chipFor(id)])
+          ]);
+          
+          attachRowDnD(tr);
+          return tr;
+        });
+        
+        const placeholders = Math.max(MIN_VISIBLE_ROWS - colIds.length, 0);
+        for (let i = 0; i < placeholders; i++) {
+          const ph = el('tr', {
+            className: 'empty-row',
+            dataset: { listId: 'bank' }
+          }, [el('td')]);
+          attachDropToRow(ph);
+          nodes.push(ph);
+        }
+        
+        attachDropToTbody(bodyEl);
+        replace(bodyEl, nodes);
+      };
+      
+      paint(els.bodies.bankCol1, columns[0], 0);
+      paint(els.bodies.bankCol2, columns[1], 1);
+      paint(els.bodies.bankCol3, columns[2], 2);
+    }
+
+    /* ========================================
+       DRAG & DROP SYSTEM
+       ======================================== */
+    
+    let dragData = null;
+    
+    const getList = id => 
+      id ? (id.startsWith('bank-') ? 'bank' : id.replace('-body', '')) : null;
+    
+    function bankDropIndexFromRow(tr) {
+      const tbodyId = tr.closest('tbody').id;
+      const colMatch = tbodyId.match(/bank-col(\d+)-body/);
+      
+      if (!colMatch) return 0;
+      
+      const colIndex = parseInt(colMatch[1]) - 1;
+      let realIndex = 0;
+      
+      for (const c of tr.parentElement.children) {
+        if (c === tr) break;
+        if (c.classList.contains('task-row')) realIndex++;
+      }
+      
+      return colIndex + realIndex * 3;
+    }
+    
+    const clearDnD = () => {
+      document.querySelectorAll('.table-wrap').forEach(tw => 
+        tw.classList.remove('dropzone')
+      );
+      document.querySelectorAll('tr.drop-before').forEach(el => 
+        el.classList.remove('drop-before')
+      );
+    };
+
+    function attachRowDnD(tr) {
+      tr.addEventListener('dragstart', e => {
+        const { taskId, listId, index } = tr.dataset;
+        dragData = { taskId, fromList: listId, fromIndex: Number(index) };
+        tr.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', taskId);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      
+      tr.addEventListener('dragend', () => {
+        tr.classList.remove('dragging');
+        clearDnD();
+        dragData = null;
+      });
+      
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        document.querySelectorAll('tr.drop-before').forEach(el => 
+          el.classList.remove('drop-before')
+        );
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const tbody = tr.closest('tbody');
+        const toList = getList(tbody.id);
+        const beforeIndex = (toList === 'bank') 
+          ? bankDropIndexFromRow(tr) 
+          : Array.from(tr.parentElement.children).indexOf(tr);
+        
+        moveTask(dragData.taskId, dragData.fromList, toList, beforeIndex);
+        dragData = null;
+      });
+    }
+
+    function attachDropToRow(tr) {
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(tr.closest('tbody').id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function attachDropToTbody(tbody) {
+      if (tbody.dataset.bound === '1') return;
+      tbody.dataset.bound = '1';
+      
+      tbody.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tbody.closest('.table-wrap').classList.add('dropzone');
+      });
+      
+      tbody.addEventListener('dragleave', () => 
+        tbody.closest('.table-wrap').classList.remove('dropzone')
+      );
+      
+      tbody.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(e.currentTarget.id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function moveTask(taskId, fromList, toList, beforeIndex) {
+      clearDnD();
+      if (!taskId || !fromList || !toList) return;
+      
+      if (!state.tasks[taskId]) {
+        console.warn(`Cannot move task with id ${taskId} - task not found in state.tasks`);
+        return;
+      }
+      
+      const fromArr = state.lists[fromList];
+      const i = fromArr.indexOf(taskId);
+      if (i > -1) fromArr.splice(i, 1);
+      
+      const toArr = state.lists[toList];
+      
+      if (toList === 'soon' && !state.tasks[taskId].addedSoonAt) {
+        state.tasks[taskId].addedSoonAt = Date.now();
+      }
+      
+      if (toList === 'now') {
+        state.tasks[taskId].nowEndAt = Date.now() + 30 * 60 * 1000;
+        ensureNowInterval();
+      }
+      
+      const dest = Number.isFinite(beforeIndex) 
+        ? Math.min(Math.max(0, beforeIndex), toArr.length) 
+        : toArr.length;
+      
+      if (!toArr.includes(taskId)) {
+        toArr.splice(dest, 0, taskId);
+      }
+      
+      renderAll();
+    }
+
+    /* ========================================
+       TIMER SYSTEM FOR "NOW" TASKS
+       ======================================== */
+    
+    let nowInterval = null;
+    
+    function ensureNowInterval() {
+      if (!nowInterval) {
+        nowInterval = setInterval(() => {
+          if (state.lists.now.length) {
+            renderList('now');
+          } else {
+            clearInterval(nowInterval);
+            nowInterval = null;
+          }
+        }, 1000);
+      }
+    }
+    
+    function clearNowInterval() {
+      if (nowInterval) {
+        clearInterval(nowInterval);
+        nowInterval = null;
+      }
+    }
+    
+    window.addEventListener('beforeunload', clearNowInterval);
+    
+    const pad = n => String(n).padStart(2, '0');
+    
+    function formatMMSS(ms) {
+      const sec = Math.ceil(ms / 1000);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${pad(m)}:${pad(s)}`;
+    }
+
+    /* ========================================
+       INPUT HANDLING
+       ======================================== */
+    
+    els.input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const v = els.input.value.trim();
+        if (v) {
+          addTaskToBank(v);
+          els.input.value = '';
+        }
+      }
+    });
+
+    /* ========================================
+       APPLICATION INITIALIZATION
+       ======================================== */
+    
+    function init() {
+      renderAll();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+  </script>
+</body>
+</html>

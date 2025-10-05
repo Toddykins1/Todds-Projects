@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Cyberpunk Task Board Application
+    A futuristic, neon-lit task management system with glitch effects,
+    matrix-style aesthetics, and cyberpunk visual elements.
+  -->
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CYBER_TASKS.exe</title>
+  
+  <!-- Google Fonts: Orbitron for futuristic display, and Rajdhani for cyberpunk feel -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       CYBERPUNK DESIGN SYSTEM
+       ======================================== */
+    
+    :root {
+      /* === CYBERPUNK COLOR PALETTE === */
+      --bg: #0a0a0a;           /* Deep black background */
+      --panel: #111111;        /* Dark gray panels */
+      --panel-2: #0d0d0d;      /* Darker gray for depth */
+      --ink: #00ff41;          /* Matrix green text */
+      --ink-dim: #00cc33;      /* Dimmed green */
+      --line: #333333;         /* Dark borders */
+      
+      /* === CYBERPUNK ACCENTS === */
+      --accent: #ff0080;       /* Hot pink neon */
+      --accent-dim: #cc0066;   /* Dimmed pink */
+      --cyan: #00ffff;         /* Cyan neon */
+      --yellow: #ffff00;       /* Yellow neon */
+      --purple: #8000ff;       /* Purple neon */
+      
+      /* === LAYOUT DIMENSIONS === */
+      --row-h: 44px;           /* Compact rows */
+      --head-h: 50px;          /* Taller headers */
+      
+      /* === CYBERPUNK EFFECTS === */
+      --radius: 4px;           /* Sharp corners */
+      --shadow: 0 0 20px rgba(0,255,65,.3);  /* Green glow */
+    }
+    
+    /* ========================================
+       GLOBAL RESET & CYBERPUNK BASE
+       ======================================== */
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      /* Cyberpunk background with grid pattern */
+      background: 
+        linear-gradient(rgba(0,255,65,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,65,.03) 1px, transparent 1px),
+        var(--bg);
+      background-size: 20px 20px;
+      color: var(--ink);
+      font-family: 'Rajdhani', monospace;
+      letter-spacing: .1em;
+      overflow-x: hidden;
+      position: relative;
+    }
+    
+    /* Matrix-style rain effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(transparent 0%, rgba(0,255,65,.1) 50%, transparent 100%);
+      animation: matrixRain 3s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    @keyframes matrixRain {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100vh); }
+    }
+    
+    /* Glitch overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(90deg, transparent 98%, rgba(255,0,128,.1) 100%);
+      animation: glitchScan 0.1s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    @keyframes glitchScan {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100vw); }
+    }
+    
+    /* ========================================
+       CYBERPUNK TOP BAR
+       ======================================== */
+    
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px 12px;
+      border-bottom: 2px solid var(--accent);
+      background: var(--panel);
+      position: relative;
+      z-index: 2;
+    }
+    
+    .topbar::before {
+      content: 'SYSTEM_STATUS: ONLINE';
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      color: var(--cyan);
+      animation: statusBlink 2s ease-in-out infinite;
+    }
+    
+    @keyframes statusBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    
+    .topbar .label {
+      color: var(--ink-dim);
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      opacity: .9;
+      user-select: none;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+    
+    /* ========================================
+       CYBERPUNK INPUT COMPONENTS
+       ======================================== */
+    
+    .task-input {
+      width: 22ch;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--accent);
+      caret-color: var(--accent);
+      font: 600 16px 'Rajdhani', monospace;
+      padding: 6px 8px 4px;
+      border-bottom: 2px solid transparent;
+      transition: all .2s ease;
+      text-transform: uppercase;
+    }
+    
+    .task-input::placeholder {
+      color: rgba(0,255,65,.4);
+      text-transform: lowercase;
+    }
+    
+    .task-input:focus {
+      border-bottom-color: var(--accent);
+      box-shadow: 0 0 10px rgba(255,0,128,.5);
+      text-shadow: 0 0 5px var(--accent);
+    }
+    
+    .hint {
+      font-size: 11px;
+      color: var(--cyan);
+      margin-left: 6px;
+      font-family: 'Orbitron', monospace;
+      text-transform: uppercase;
+    }
+    
+    /* ========================================
+       CYBERPUNK BOARD LAYOUT
+       ======================================== */
+    
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 16px;
+      padding: 16px 20px 20px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .board .list-card:last-child {
+      grid-column: 1/-1;
+    }
+    
+    /* ========================================
+       CYBERPUNK LIST CARDS
+       ======================================== */
+    
+    .list-card {
+      /* Cyberpunk panel with neon border */
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 
+        var(--shadow),
+        inset 0 0 20px rgba(0,255,65,.1);
+      padding: 12px 12px 16px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+      transition: all .3s ease;
+    }
+    
+    .list-card:hover {
+      border-color: var(--accent);
+      box-shadow: 
+        0 0 30px rgba(255,0,128,.4),
+        inset 0 0 20px rgba(0,255,65,.2);
+    }
+    
+    .list-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--accent), var(--cyan), var(--yellow), var(--purple));
+      border-radius: var(--radius);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    
+    .list-card:hover::before {
+      opacity: .3;
+    }
+    
+    .list-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font: 700 16px 'Orbitron', monospace;
+      letter-spacing: .2em;
+      margin: 2px 6px 10px;
+      color: var(--ink);
+      text-transform: uppercase;
+      position: relative;
+    }
+    
+    .list-title .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 
+        0 0 10px var(--accent),
+        0 0 20px var(--accent);
+      animation: neonPulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes neonPulse {
+      0%, 100% { 
+        box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
+        transform: scale(1.2);
+      }
+    }
+    
+    /* ========================================
+       CYBERPUNK TABLE CONTAINER
+       ======================================== */
+    
+    .table-wrap {
+      height: calc(var(--head-h) + var(--row-h) * 8);
+      overflow: auto;
+      border-radius: var(--radius);
+      border: 2px solid var(--line);
+      position: relative;
+      background: var(--panel-2);
+    }
+    
+    .table-wrap::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 4px;
+      box-shadow: 0 0 10px var(--accent);
+    }
+    
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: var(--cyan);
+      box-shadow: 0 0 15px var(--cyan);
+    }
+    
+    /* ========================================
+       CYBERPUNK TABLE STRUCTURE
+       ======================================== */
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+    
+    thead th {
+      position: sticky;
+      top: 0;
+      text-align: left;
+      font-weight: 700;
+      height: var(--head-h);
+      padding: 8px 12px;
+      background: var(--panel);
+      border-bottom: 2px solid var(--accent);
+      z-index: 2;
+      font-family: 'Orbitron', monospace;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+    
+    tbody td {
+      height: var(--row-h);
+      padding: 6px 12px;
+      vertical-align: middle;
+      border-bottom: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    
+    /* ========================================
+       CYBERPUNK TASK ROWS
+       ======================================== */
+    
+    .task-row {
+      cursor: grab;
+      transition: all .2s ease;
+      position: relative;
+    }
+    
+    .task-row:hover {
+      background: rgba(0,255,65,.05);
+      box-shadow: inset 0 0 10px rgba(0,255,65,.1);
+    }
+    
+    .task-row:active {
+      cursor: grabbing;
+      transform: scale(1.02);
+    }
+    
+    /* ========================================
+       CYBERPUNK TASK CHIPS
+       ======================================== */
+    
+    .task-chip {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 2px;
+      background: rgba(0,255,65,.1);
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      font-weight: 500;
+      letter-spacing: .05em;
+      box-shadow: 
+        0 0 5px rgba(0,255,65,.3) inset,
+        0 0 10px rgba(0,255,65,.2);
+      transition: all .2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .task-chip::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,255,65,.3), transparent);
+      transition: left .3s ease;
+    }
+    
+    .task-chip:hover::before {
+      left: 100%;
+    }
+    
+    .task-chip:hover {
+      background: rgba(255,0,128,.1);
+      border-color: var(--accent);
+      box-shadow: 
+        0 0 10px rgba(255,0,128,.4) inset,
+        0 0 20px rgba(255,0,128,.3);
+      color: var(--accent);
+    }
+    
+    /* ========================================
+       CYBERPUNK DRAG & DROP STATES
+       ======================================== */
+    
+    .dragging {
+      opacity: .6;
+      filter: hue-rotate(180deg) saturate(2);
+      transform: rotate(2deg) scale(1.05);
+    }
+    
+    .empty-row td {
+      color: rgba(0,255,65,.2);
+      border-bottom: none;
+      position: relative;
+    }
+    
+    .empty-row:hover td {
+      background: rgba(0,255,65,.05);
+    }
+    
+    .table-wrap.dropzone {
+      border-color: var(--accent) !important;
+      box-shadow: 
+        0 0 20px rgba(255,0,128,.6),
+        inset 0 0 20px rgba(0,255,65,.1);
+      animation: cyberGlow 0.5s ease-in-out infinite alternate;
+    }
+    
+    @keyframes cyberGlow {
+      0% { 
+        box-shadow: 0 0 20px rgba(255,0,128,.6), inset 0 0 20px rgba(0,255,65,.1);
+      }
+      100% { 
+        box-shadow: 0 0 30px rgba(255,0,128,.8), inset 0 0 30px rgba(0,255,65,.2);
+      }
+    }
+    
+    /* ========================================
+       CYBERPUNK HEADER INPUT
+       ======================================== */
+    
+    thead th .task-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--ink);
+      font: 500 16px 'Rajdhani', monospace;
+      padding: 8px 12px;
+      text-align: left;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+    
+    thead th .task-input::placeholder {
+      color: rgba(0,255,65,.5);
+      text-transform: lowercase;
+    }
+    
+    /* ========================================
+       CYBERPUNK TASK BANK LAYOUT
+       ======================================== */
+    
+    .bank-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      padding: 0 8px 8px;
+    }
+    
+    /* ========================================
+       CYBERPUNK TIMER ANIMATIONS
+       ======================================== */
+    
+    .timer-done {
+      color: var(--accent);
+      animation: cyberBlink 0.5s ease-in-out infinite;
+      font-weight: 700;
+      text-shadow: 0 0 10px var(--accent);
+    }
+    
+    @keyframes cyberBlink {
+      0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 0.3;
+        transform: scale(1.1);
+      }
+    }
+    
+    /* ========================================
+       CYBERPUNK GLITCH EFFECTS
+       ======================================== */
+    
+    .glitch {
+      position: relative;
+      animation: glitch 2s infinite;
+    }
+    
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+    }
+    
+    /* ========================================
+       CYBERPUNK RESPONSIVE DESIGN
+       ======================================== */
+    
+    @media (max-width: 768px) {
+      .board {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 12px 16px 16px;
+      }
+      
+      .board .list-card:last-child {
+        grid-column: 1;
+      }
+      
+      .bank-columns {
+        grid-template-columns: 1fr;
+      }
+      
+      .topbar::before {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="board">
+    
+    <!-- ========================================
+         CYBERPUNK CURRENT FOCUS SECTION
+         ======================================== -->
+    <section class="list-card" data-list="now">
+      <div class="list-title">
+        <span class="dot"></span> 
+        ACTIVE_PROCESS
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:90px">TIMER</th>
+              <th>PROCESS</th>
+            </tr>
+          </thead>
+          <tbody id="now-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         CYBERPUNK NEEDS DOING SECTION
+         ======================================== -->
+    <section class="list-card" data-list="soon">
+      <div class="list-title">
+        <span class="dot"></span> 
+        QUEUE
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width:90px">INIT</th>
+              <th>TASK</th>
+            </tr>
+          </thead>
+          <tbody id="soon-body">
+            <!-- Task rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================
+         CYBERPUNK TASK BANK SECTION
+         ======================================== -->
+    <section class="list-card" data-list="bank">
+      <div class="list-title">
+        <span class="dot"></span> 
+        TASK_DATABASE
+      </div>
+      
+      <div class="table-wrap">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th colspan="3">
+                <input 
+                  id="newTask" 
+                  class="task-input" 
+                  type="text" 
+                  maxlength="120" 
+                  placeholder="initialize new task..." 
+                  autocomplete="off" 
+                />
+              </th>
+            </tr>
+          </thead>
+        </table>
+        
+        <div class="bank-columns">
+          <table class="task-table">
+            <tbody id="bank-col1-body">
+              <!-- Column 1 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col2-body">
+              <!-- Column 2 tasks -->
+            </tbody>
+          </table>
+          
+          <table class="task-table">
+            <tbody id="bank-col3-body">
+              <!-- Column 3 tasks -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  <script>
+    /* ========================================
+       DOM MANIPULATION UTILITIES
+       ======================================== */
+    
+    const $ = id => document.getElementById(id);
+    
+    const el = (tag, attrs = {}, kids = []) => {
+      const n = document.createElement(tag);
+      
+      for (const k in attrs) {
+        if (k === 'style') {
+          Object.assign(n.style, attrs.style);
+        } else if (k === 'dataset') {
+          Object.assign(n.dataset, attrs.dataset);
+        } else {
+          n[k] = attrs[k];
+        }
+      }
+      
+      kids.forEach(ch => n.appendChild(ch));
+      return n;
+    };
+    
+    const replace = (node, children) => node.replaceChildren(...children);
+
+    /* ========================================
+       CYBERPUNK COLOR SYSTEM
+       ======================================== */
+    
+    const COLORS = [
+      '#00ff41',  // Matrix green
+      '#ff0080',  // Hot pink
+      '#00ffff',  // Cyan
+      '#ffff00',  // Yellow
+      '#8000ff',  // Purple
+      '#ff8000'   // Orange
+    ];
+    
+    const randomColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    /* ========================================
+       APPLICATION STATE
+       ======================================== */
+    
+    const state = {
+      tasks: {},
+      lists: {
+        now: [],
+        soon: [],
+        bank: []
+      }
+    };
+    
+    const MIN_VISIBLE_ROWS = 8;
+
+    /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+    
+    const els = {
+      input: $('newTask'),
+      bodies: {
+        now: $('now-body'),
+        soon: $('soon-body'),
+        bankCol1: $('bank-col1-body'),
+        bankCol2: $('bank-col2-body'),
+        bankCol3: $('bank-col3-body')
+      }
+    };
+
+    /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+    
+    const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    /* ========================================
+       TASK MANAGEMENT FUNCTIONS
+       ======================================== */
+    
+    function addTaskToBank(text) {
+      const id = uid();
+      
+      state.tasks[id] = {
+        text: text.trim(),
+        textColor: randomColor()
+      };
+      
+      state.lists.bank.push(id);
+      renderAll();
+    }
+
+    const chipFor = id => {
+      const t = state.tasks[id];
+      
+      if (!t) {
+        console.warn(`Task with id ${id} not found in state.tasks`);
+        return el('span', {
+          className: 'task-chip',
+          textContent: '[PROCESS_NOT_FOUND]'
+        });
+      }
+      
+      const s = el('span', { className: 'task-chip' });
+      s.textContent = t.text;
+      s.style.color = t.textColor || '#00ff41';
+      return s;
+    };
+
+    /* ========================================
+       TIME FORMATTING UTILITIES
+       ======================================== */
+    
+    const sameDay = (a, b) => 
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+    
+    const formatSoon = ms => {
+      const d = new Date(ms);
+      const now = new Date();
+      
+      return sameDay(d, now) 
+        ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : d.toLocaleDateString([], { month: '2-digit', day: '2-digit' });
+    };
+
+    /* ========================================
+       RENDERING SYSTEM
+       ======================================== */
+    
+    function renderAll() {
+      renderList('now');
+      renderList('soon');
+      renderBank();
+    }
+
+    function renderList(listId) {
+      const body = els.bodies[listId];
+      const ids = state.lists[listId];
+      
+      const rows = ids.map((id, index) => {
+        if (!state.tasks[id]) {
+          console.warn(`Task with id ${id} not found in state.tasks`);
+          return null;
+        }
+        
+        const tdA = el('td');
+        
+        if (listId === 'soon') {
+          const ts = state.tasks[id].addedSoonAt;
+          tdA.textContent = ts ? formatSoon(ts) : '—';
+        }
+        
+        if (listId === 'now') {
+          const end = state.tasks[id].nowEndAt;
+          if (end) {
+            const rem = end - Date.now();
+            if (rem <= 0) {
+              tdA.textContent = '00:00';
+              tdA.classList.add('timer-done');
+            } else {
+              tdA.textContent = formatMMSS(rem);
+              tdA.classList.remove('timer-done');
+            }
+          } else {
+            tdA.textContent = '';
+          }
+        }
+        
+        const tr = el('tr', {
+          className: 'task-row',
+          draggable: true,
+          dataset: { taskId: id, listId, index }
+        }, [
+          tdA,
+          el('td', {}, [chipFor(id)])
+        ]);
+        
+        attachRowDnD(tr);
+        return tr;
+      }).filter(row => row !== null);
+      
+      const placeholders = Math.max(MIN_VISIBLE_ROWS - ids.length, 0);
+      for (let i = 0; i < placeholders; i++) {
+        const ph = el('tr', {
+          className: 'empty-row',
+          dataset: { listId }
+        }, [el('td'), el('td')]);
+        attachDropToRow(ph);
+        rows.push(ph);
+      }
+      
+      attachDropToTbody(body);
+      replace(body, rows);
+    }
+
+    function renderBank() {
+      const ids = state.lists.bank;
+      const columns = [[], [], []];
+      
+      ids.forEach((id, i) => columns[i % 3].push(id));
+      
+      const paint = (bodyEl, colIds, colIndex) => {
+        const nodes = colIds.map((id, i) => {
+          const index = colIndex + i * 3;
+          
+          const tr = el('tr', {
+            className: 'task-row',
+            draggable: true,
+            dataset: { taskId: id, listId: 'bank', index }
+          }, [
+            el('td', {}, [chipFor(id)])
+          ]);
+          
+          attachRowDnD(tr);
+          return tr;
+        });
+        
+        const placeholders = Math.max(MIN_VISIBLE_ROWS - colIds.length, 0);
+        for (let i = 0; i < placeholders; i++) {
+          const ph = el('tr', {
+            className: 'empty-row',
+            dataset: { listId: 'bank' }
+          }, [el('td')]);
+          attachDropToRow(ph);
+          nodes.push(ph);
+        }
+        
+        attachDropToTbody(bodyEl);
+        replace(bodyEl, nodes);
+      };
+      
+      paint(els.bodies.bankCol1, columns[0], 0);
+      paint(els.bodies.bankCol2, columns[1], 1);
+      paint(els.bodies.bankCol3, columns[2], 2);
+    }
+
+    /* ========================================
+       DRAG & DROP SYSTEM
+       ======================================== */
+    
+    let dragData = null;
+    
+    const getList = id => 
+      id ? (id.startsWith('bank-') ? 'bank' : id.replace('-body', '')) : null;
+    
+    function bankDropIndexFromRow(tr) {
+      const tbodyId = tr.closest('tbody').id;
+      const colMatch = tbodyId.match(/bank-col(\d+)-body/);
+      
+      if (!colMatch) return 0;
+      
+      const colIndex = parseInt(colMatch[1]) - 1;
+      let realIndex = 0;
+      
+      for (const c of tr.parentElement.children) {
+        if (c === tr) break;
+        if (c.classList.contains('task-row')) realIndex++;
+      }
+      
+      return colIndex + realIndex * 3;
+    }
+    
+    const clearDnD = () => {
+      document.querySelectorAll('.table-wrap').forEach(tw => 
+        tw.classList.remove('dropzone')
+      );
+      document.querySelectorAll('tr.drop-before').forEach(el => 
+        el.classList.remove('drop-before')
+      );
+    };
+
+    function attachRowDnD(tr) {
+      tr.addEventListener('dragstart', e => {
+        const { taskId, listId, index } = tr.dataset;
+        dragData = { taskId, fromList: listId, fromIndex: Number(index) };
+        tr.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', taskId);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      
+      tr.addEventListener('dragend', () => {
+        tr.classList.remove('dragging');
+        clearDnD();
+        dragData = null;
+      });
+      
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        document.querySelectorAll('tr.drop-before').forEach(el => 
+          el.classList.remove('drop-before')
+        );
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const tbody = tr.closest('tbody');
+        const toList = getList(tbody.id);
+        const beforeIndex = (toList === 'bank') 
+          ? bankDropIndexFromRow(tr) 
+          : Array.from(tr.parentElement.children).indexOf(tr);
+        
+        moveTask(dragData.taskId, dragData.fromList, toList, beforeIndex);
+        dragData = null;
+      });
+    }
+
+    function attachDropToRow(tr) {
+      tr.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tr.closest('.table-wrap').classList.add('dropzone');
+        tr.classList.add('drop-before');
+      });
+      
+      tr.addEventListener('dragleave', () => tr.classList.remove('drop-before'));
+      
+      tr.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(tr.closest('tbody').id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function attachDropToTbody(tbody) {
+      if (tbody.dataset.bound === '1') return;
+      tbody.dataset.bound = '1';
+      
+      tbody.addEventListener('dragover', e => {
+        if (!dragData) return;
+        e.preventDefault();
+        tbody.closest('.table-wrap').classList.add('dropzone');
+      });
+      
+      tbody.addEventListener('dragleave', () => 
+        tbody.closest('.table-wrap').classList.remove('dropzone')
+      );
+      
+      tbody.addEventListener('drop', e => {
+        e.preventDefault();
+        if (!dragData) return;
+        
+        const toList = getList(e.currentTarget.id);
+        moveTask(dragData.taskId, dragData.fromList, toList, Infinity);
+        dragData = null;
+      });
+    }
+
+    function moveTask(taskId, fromList, toList, beforeIndex) {
+      clearDnD();
+      if (!taskId || !fromList || !toList) return;
+      
+      if (!state.tasks[taskId]) {
+        console.warn(`Cannot move task with id ${taskId} - task not found in state.tasks`);
+        return;
+      }
+      
+      const fromArr = state.lists[fromList];
+      const i = fromArr.indexOf(taskId);
+      if (i > -1) fromArr.splice(i, 1);
+      
+      const toArr = state.lists[toList];
+      
+      if (toList === 'soon' && !state.tasks[taskId].addedSoonAt) {
+        state.tasks[taskId].addedSoonAt = Date.now();
+      }
+      
+      if (toList === 'now') {
+        state.tasks[taskId].nowEndAt = Date.now() + 30 * 60 * 1000;
+        ensureNowInterval();
+      }
+      
+      const dest = Number.isFinite(beforeIndex) 
+        ? Math.min(Math.max(0, beforeIndex), toArr.length) 
+        : toArr.length;
+      
+      if (!toArr.includes(taskId)) {
+        toArr.splice(dest, 0, taskId);
+      }
+      
+      renderAll();
+    }
+
+    /* ========================================
+       TIMER SYSTEM FOR "NOW" TASKS
+       ======================================== */
+    
+    let nowInterval = null;
+    
+    function ensureNowInterval() {
+      if (!nowInterval) {
+        nowInterval = setInterval(() => {
+          if (state.lists.now.length) {
+            renderList('now');
+          } else {
+            clearInterval(nowInterval);
+            nowInterval = null;
+          }
+        }, 1000);
+      }
+    }
+    
+    function clearNowInterval() {
+      if (nowInterval) {
+        clearInterval(nowInterval);
+        nowInterval = null;
+      }
+    }
+    
+    window.addEventListener('beforeunload', clearNowInterval);
+    
+    const pad = n => String(n).padStart(2, '0');
+    
+    function formatMMSS(ms) {
+      const sec = Math.ceil(ms / 1000);
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${pad(m)}:${pad(s)}`;
+    }
+
+    /* ========================================
+       INPUT HANDLING
+       ======================================== */
+    
+    els.input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const v = els.input.value.trim();
+        if (v) {
+          addTaskToBank(v);
+          els.input.value = '';
+        }
+      }
+    });
+
+    /* ========================================
+       APPLICATION INITIALIZATION
+       ======================================== */
+    
+    function init() {
+      renderAll();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    
+  </script>
+</body>
+</html>
