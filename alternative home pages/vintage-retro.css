@@ -401,6 +401,7 @@ body::before {
     justify-content: center;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .theme-btn::before {
