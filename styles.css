@@ -167,7 +167,7 @@ body::after {
     background-clip: text;
     margin-bottom: 1rem;
     letter-spacing: -0.02em;
-    animation: fadeInUp 0.8s ease-out, titleGlow 4s ease-in-out infinite;
+    animation: titleGlow 4s ease-in-out infinite;
     position: relative;
     z-index: 1;
     text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
@@ -189,7 +189,6 @@ body::after {
     justify-content: center;
     gap: 1.5rem;
     margin: 3rem 0 2rem 0;
-    animation: fadeInUp 0.8s ease-out 0.1s both;
     position: relative;
     z-index: 1;
 }
@@ -330,7 +329,6 @@ body::after {
     font-size: 1.2rem;
     color: var(--text-secondary);
     font-weight: 300;
-    animation: fadeInUp 0.8s ease-out 0.2s both;
     position: relative;
     z-index: 1;
     text-shadow: 0 0 20px rgba(160, 160, 160, 0.1);
@@ -355,7 +353,6 @@ body::after {
     border-radius: 16px;
     overflow: hidden;
     transition: var(--transition);
-    animation: fadeInUp 0.6s ease-out;
     position: relative;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
