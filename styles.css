@@ -1001,12 +1001,5 @@ body::after {
 
 /* Smooth page transitions */
 body {
-    opacity: 0;
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
+    opacity: 1;
 }
