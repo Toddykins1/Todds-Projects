@@ -170,45 +170,6 @@ body::before {
 }
 
 /* Theme Navigation */
-.theme-nav {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 10;
-}
-
-.back-to-default {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: var(--bg-secondary);
-    border: 2px solid var(--accent-primary);
-    border-radius: 12px;
-    text-decoration: none;
-    color: var(--accent-primary);
-    font-size: 0.9rem;
-    font-weight: 400;
-    transition: var(--transition);
-    box-shadow: var(--shadow);
-}
-
-.back-to-default:hover {
-    background: rgba(107, 142, 35, 0.1);
-    border-color: var(--accent-secondary);
-    color: var(--accent-secondary);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-hover);
-}
-
-.back-icon {
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.back-to-default:hover .back-icon {
-    transform: translateX(-2px);
-}
 
 .header::before {
     content: '';

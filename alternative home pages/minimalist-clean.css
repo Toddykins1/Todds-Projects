@@ -85,45 +85,6 @@ body::before {
 }
 
 /* Theme Navigation */
-.theme-nav {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 10;
-}
-
-.back-to-default {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    font-weight: 400;
-    transition: var(--transition);
-    box-shadow: var(--shadow);
-}
-
-.back-to-default:hover {
-    background: var(--hover-bg);
-    border-color: var(--accent-primary);
-    color: var(--accent-primary);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-hover);
-}
-
-.back-icon {
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.back-to-default:hover .back-icon {
-    transform: translateX(-2px);
-}
 
 .title {
     font-size: clamp(2.5rem, 5vw, 3.5rem);
