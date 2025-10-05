@@ -3,16 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todd's Random Projects</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Todd's Random Projects - Cyberpunk</title>
+    <link rel="stylesheet" href="cyberpunk-neon.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
+        <!-- Animated background grid -->
+        <div class="cyber-grid"></div>
+        
         <header class="header">
-            <h1 class="title">Todd's Random Projects</h1>
+            <div class="theme-nav">
+                <a href="../index.html" class="back-to-default" title="Back to Default Theme">
+                    <span class="back-icon">←</span>
+                    <span class="back-text">DEFAULT</span>
+                </a>
+            </div>
+            <h1 class="title">
+                <span class="title-text">TODD'S</span>
+                <span class="title-accent">RANDOM</span>
+                <span class="title-text">PROJECTS</span>
+            </h1>
             <p class="subtitle">A collection of games and tools I've been working on.</p>
             <p class="subtitle">Almost none of these are nearly complete, just test projects I may never finish.</p>
         </header>
@@ -23,19 +36,19 @@
             </div>
             
             <div class="theme-selector">
-                <span class="theme-label">Theme:</span>
+                <span class="theme-label">THEME:</span>
                 <div class="theme-container">
                     <button class="theme-nav-btn theme-nav-left" title="Previous themes">
                         <span class="nav-arrow">‹</span>
                     </button>
                     <div class="theme-options">
-                        <button class="theme-btn active" data-theme="default" title="Default Theme">
+                        <button class="theme-btn" data-theme="default" title="Default Theme">
                             <span class="theme-icon">🌙</span>
                         </button>
                         <button class="theme-btn" data-theme="minimalist" title="Minimalist Clean">
                             <span class="theme-icon">⚪</span>
                         </button>
-                        <button class="theme-btn" data-theme="cyberpunk" title="Cyberpunk Neon">
+                        <button class="theme-btn active" data-theme="cyberpunk" title="Cyberpunk Neon">
                             <span class="theme-icon">⚡</span>
                         </button>
                         <button class="theme-btn" data-theme="nature" title="Nature Organic">
@@ -69,6 +82,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script-alt.js"></script>
 </body>
 </html>

@@ -3,15 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todd's Random Projects</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Todd's Random Projects - Nature</title>
+    <link rel="stylesheet" href="nature-organic.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
+        <!-- Organic background elements -->
+        <div class="organic-bg">
+            <div class="leaf leaf-1"></div>
+            <div class="leaf leaf-2"></div>
+            <div class="leaf leaf-3"></div>
+            <div class="leaf leaf-4"></div>
+            <div class="leaf leaf-5"></div>
+        </div>
+        
         <header class="header">
+            <div class="theme-nav">
+                <a href="../index.html" class="back-to-default" title="Back to Default Theme">
+                    <span class="back-icon">←</span>
+                    <span class="back-text">Default</span>
+                </a>
+            </div>
             <h1 class="title">Todd's Random Projects</h1>
             <p class="subtitle">A collection of games and tools I've been working on.</p>
             <p class="subtitle">Almost none of these are nearly complete, just test projects I may never finish.</p>
@@ -29,7 +44,7 @@
                         <span class="nav-arrow">‹</span>
                     </button>
                     <div class="theme-options">
-                        <button class="theme-btn active" data-theme="default" title="Default Theme">
+                        <button class="theme-btn" data-theme="default" title="Default Theme">
                             <span class="theme-icon">🌙</span>
                         </button>
                         <button class="theme-btn" data-theme="minimalist" title="Minimalist Clean">
@@ -38,7 +53,7 @@
                         <button class="theme-btn" data-theme="cyberpunk" title="Cyberpunk Neon">
                             <span class="theme-icon">⚡</span>
                         </button>
-                        <button class="theme-btn" data-theme="nature" title="Nature Organic">
+                        <button class="theme-btn active" data-theme="nature" title="Nature Organic">
                             <span class="theme-icon">🌿</span>
                         </button>
                         <button class="theme-btn" data-theme="vintage" title="Vintage Retro">
@@ -69,6 +84,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script-alt.js"></script>
 </body>
 </html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Top-Down Survival Game - Collectibles</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #222; }
+    canvas {
+      display: block;
+      width: 100vw; height: 100vh;
+      background: #7ec850;
+      cursor: crosshair;
+    }
+    ::-webkit-scrollbar { display: none; }
+
+    /* --- Minimal, centered start screen --- */
+    #startScreen, #pauseMenu {
+      -webkit-user-select: none;
+      user-select: none;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      transition: opacity 0.15s;
+    }
+    #startScreen {
+      position: fixed; z-index: 10; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(16,22,18,0.92);
+      color: #eafcf4;
+      border: none; padding: 0;
+      min-height: 0; min-width: 0;
+      box-shadow: 0 0 0 0 #0000;
+    }
+    #startBox {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(25,30,25,0.25);
+      border-radius: 2.2em;
+      box-shadow: 0 2px 28px 0 #1127 0 1px 0 #fff2;
+      padding: 1.6em 2.3em 1.8em 2.3em;
+      min-width: 230px; max-width: 90vw;
+      min-height: 0;
+      -webkit-backdrop-filter: blur(6px) saturate(1.4);
+      backdrop-filter: blur(6px) saturate(1.4);
+      border: 1.5px solid rgba(220,255,210,0.08);
+      box-shadow: 0 4px 24px #081d44a9;
+    }
+    #startTitle {
+      font-weight: 800;
+      font-size: clamp(1.65em, 5vw, 2.6em);
+      letter-spacing: 0.04em;
+      color: #f4fff9;
+      text-shadow: 0 2px 18px #0009, 0 1px 0 #fff2;
+      margin-bottom: 0.28em;
+      margin-top: 0.2em;
+      line-height: 1.1;
+      text-align: center;
+    }
+    #startHint {
+      font-size: 1em;
+      color: #d6efe2;
+      letter-spacing: 0.01em;
+      opacity: 0.61;
+      margin-top: 0.26em;
+      font-weight: 400;
+      background: rgba(36,53,43,0.14);
+      border-radius: 0.85em;
+      padding: 0.29em 1.35em;
+      transition: opacity 0.18s;
+      text-align: center;
+      box-shadow: 0 1px 8px #0002;
+      -webkit-user-select: none;
+      user-select: none;
+      pointer-events: none;
+    }
+    #startIcon {
+      font-size: 1.8em;
+      margin-bottom: 0.1em;
+      opacity: 0.80;
+      color: #9fecc1;
+      filter: blur(0.1px) drop-shadow(0 0 5px #94e8c330);
+    }
+
+    /* --- Minimalist Pause Menu --- */
+    #pauseMenu {
+      position: fixed; z-index: 20; inset: 0;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(16,22,18,0.54); /* slight darken */
+    }
+    #pauseMenu .menuBox {
+      background: rgba(36,46,40,0.94);
+      border-radius: 1.7em;
+      box-shadow: 0 3px 16px #0006, 0 1px 0 #fff2;
+      padding: 1.2em 2.2em 1.6em 2.2em;
+      min-width: 210px; max-width: 96vw;
+      min-height: 0;
+      -webkit-backdrop-filter: blur(5px) saturate(1.22);
+      backdrop-filter: blur(5px) saturate(1.22);
+      border: 1.3px solid rgba(220,255,210,0.11);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    #pauseMenu .menuBox .pauseTitle {
+      font-size: clamp(1.15em, 4vw, 1.55em);
+      font-weight: 800;
+      color: #eafcf4;
+      letter-spacing: 0.01em;
+      margin-bottom: 0.8em;
+      margin-top: 0.05em;
+      text-shadow: 0 1px 9px #0005;
+    }
+    #pauseMenu .menuBox button {
+      margin: 0.41em 0;
+      padding: 0.58em 1.8em;
+      font-size: 1em;
+      border: none;
+      border-radius: 1.1em;
+      background: rgba(80,180,120,0.88);
+      color: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 1.5px 7px #0003;
+      outline: none;
+      filter: none;
+      transition: filter 0.18s, background 0.18s;
+      min-width: 8em;
+    }
+    #pauseMenu .menuBox button#btnControls { background:rgba(110,110,220,0.83);}
+    #pauseMenu .menuBox button#btnQuit { background:rgba(190,70,70,0.86);}
+    #pauseMenu .menuBox button:hover {
+      filter: brightness(1.1) saturate(1.3);
+    }
+    #pauseMenu .menuBox button:active { filter: brightness(0.95) saturate(1.3);}
+    #pauseMenu .menuBox #controlsInfo {
+      margin-top:1em; font-size:1em; color:#cfe5db; display:none; max-width:21em; text-align:center;
+      animation:fadein .2s;
+      background: rgba(30,40,32,0.18);
+      border-radius: 0.7em;
+      padding: 0.6em 0.8em 0.7em 0.8em;
+      box-shadow: 0 1px 5px #0002;
+    }
+    @keyframes fadein { from{opacity:0;} to{opacity:1;} }
+
+    /* --- CLOCK, MINI MAP & INVENTORY CONTAINER --- */
+    #gameHudBox {
+      position: fixed;
+      z-index: 11;
+      top: 2vw; right: 2vw;
+      background: rgba(24,27,41,0.74);
+      color: #e3ebff;
+      border-radius: 1.2em;
+      box-shadow: 0 1px 8px #0c144666;
+      padding: 0.55em 0.75em 0.60em 0.75em;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: none;
+      border: 1.3px solid rgba(110,130,180,0.10);
+      min-width: 0;
+      min-height: 0;
+      transition: opacity 0.18s, background 0.15s;
+      pointer-events: none;
+      align-items: center;
+      flex-direction: column;
+      gap: 0.52em;
+      box-sizing: border-box;
+    }
+    #miniMapBox {
+      width: 204px; height: 204px; /* 3x original size */
+      background: rgba(17,22,38,0.54);
+      border-radius: 0.46em;
+      margin: 0 auto 0.17em auto;
+      box-shadow: 0 1px 5px #13226244;
+      border: 1.1px solid rgba(110,130,180,0.10);
+      display: flex;
+      align-items: center; justify-content: center;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    #miniMapCanvas {
+      width: 270px; height: 270px; /* 5x original size */
+      background: none;
+      display: block;
+      border-radius: 0.3em;
+    }
+    #gameClock {
+      font-variant-numeric: tabular-nums;
+      font-size: 1.22em;
+      letter-spacing: 0.02em;
+      text-align: right;
+      opacity: 0.94;
+      min-width: 3.3em;
+      width: 100%;
+      margin: 2%;
+      -webkit-user-select: none;
+      user-select: none;
+      background: none;
+      box-shadow: none;
+      border: none;
+      padding: 0;
+      line-height: 1.15;
+    }
+    
+    /* --- INVENTORY DISPLAY --- */
+    #inventoryBox {
+      background: rgba(17,22,38,0.54);
+      border-radius: 0.46em;
+      padding: 0.4em 0.6em;
+      margin-top: 0.2em;
+      box-shadow: 0 1px 5px #13226244;
+      border: 1.1px solid rgba(110,130,180,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3em;
+      min-width: 120px;
+    }
+    #inventoryBox .item {
+      display: flex;
+      align-items: center;
+      gap: 0.2em;
+      font-size: 0.9em;
+      color: #e3ebff;
+    }
+    #inventoryBox .item-icon {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    #inventoryBox .item-count {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      min-width: 1.2em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <!-- HUD Clock, Mini Map & Inventory Container -->
+  <div id="gameHudBox">
+    <div id="miniMapBox">
+      <canvas id="miniMapCanvas" width="162" height="162"></canvas>
+    </div>
+    <div id="gameClock">07:00 AM</div>
+    <div id="inventoryBox">
+      <div class="item">
+        <span class="item-icon">🍎</span>
+        <span class="item-count" id="foodCount">0</span>
+      </div>
+      <div class="item">
+        <span class="item-icon">🪵</span>
+        <span class="item-count" id="woodCount">0</span>
+      </div>
+      <div class="item">
+        <span class="item-icon">🪨</span>
+        <span class="item-count" id="stoneCount">0</span>
+      </div>
+    </div>
+  </div>
+  <!-- Start screen overlay -->
+  <div id="startScreen">
+    <div id="startBox">
+      <div id="startIcon">🞂</div>
+      <div id="startTitle">Top-Down<br>Survival</div>
+      <div id="startHint">Click anywhere to begin</div>
+    </div>
+  </div>
+  <!-- Pause menu overlay -->
+  <div id="pauseMenu">
+    <div class="menuBox">
+      <div class="pauseTitle">Paused</div>
+      <button id="btnContinue">Continue</button>
+      <button id="btnControls">Controls</button>
+      <button id="btnQuit">Quit</button>
+      <div id="controlsInfo">
+        <div><b>Move:</b> WASD or Arrow keys</div>
+        <div><b>Mouse:</b> Steer / Look</div>
+        <div><b>Shift:</b> Sprint</div>
+        <div><b>Esc:</b> Pause menu</div>
+        <div><b>Collect:</b> Walk over items</div>
+      </div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
+

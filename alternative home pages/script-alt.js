@@ -119,10 +119,10 @@ class GameManager {
                     status: "Complete",
                     category: "games",
                     versions: [
-                        { name: "Classic", path: "Games/Snake/snake-game.html" },
-                        { name: "Nature", path: "Games/Snake/nature-organic-snake.html" },
-                        { name: "Neon", path: "Games/Snake/neon-cyber-snake.html" },
-                        { name: "Space", path: "Games/Snake/space-cosmic-snake.html" }
+                        { name: "Classic", path: "../Games/Snake/snake-game.html" },
+                        { name: "Nature", path: "../Games/Snake/nature-organic-snake.html" },
+                        { name: "Neon", path: "../Games/Snake/neon-cyber-snake.html" },
+                        { name: "Space", path: "../Games/Snake/space-cosmic-snake.html" }
                     ]
                 },
                 {
@@ -133,7 +133,7 @@ class GameManager {
                     status: "Complete",
                     category: "games",
                     versions: [
-                        { name: "Original", path: "Games/Verbal%20Memory%20Grid/index.html" }
+                        { name: "Original", path: "../Games/Verbal%20Memory%20Grid/index.html" }
                     ]
                 },
                 {
@@ -144,8 +144,8 @@ class GameManager {
                     status: "In Progress",
                     category: "games",
                     versions: [
-                        { name: "Version A1", path: "Games/Orb%20Survival/Orb%20Survival%20A1/index.html" },
-                        { name: "Version A2", path: "Games/Orb%20Survival/Version%20A2/index.html" }
+                        { name: "Version A1", path: "../Games/Orb%20Survival/Orb%20Survival%20A1/index.html" },
+                        { name: "Version A2", path: "../Games/Orb%20Survival/Version%20A2/index.html" }
                     ]
                 },
                 {
@@ -156,10 +156,10 @@ class GameManager {
                     status: "In Progress",
                     category: "games",
                     versions: [
-                        { name: "Main Version", path: "Games/PiTrainer/index.html" },
-                        { name: "Nature Organic", path: "Games/PiTrainer/pitrainer-nature-organic.html" },
-                        { name: "Retro Vaporwave", path: "Games/PiTrainer/pitrainer-retro-vaporwave.html" },
-                        { name: "Minimalist Glass", path: "Games/PiTrainer/pitrainer-minimalist-glass.html" }
+                        { name: "Main Version", path: "../Games/PiTrainer/index.html" },
+                        { name: "Nature Organic", path: "../Games/PiTrainer/pitrainer-nature-organic.html" },
+                        { name: "Retro Vaporwave", path: "../Games/PiTrainer/pitrainer-retro-vaporwave.html" },
+                        { name: "Minimalist Glass", path: "../Games/PiTrainer/pitrainer-minimalist-glass.html" }
                     ]
                 },
                 {
@@ -170,7 +170,7 @@ class GameManager {
                     status: "Early Concept",
                     category: "games",
                     versions: [
-                        { name: "Main Version", path: "Games/Top-Down%20Survival%20Game/index.html" }
+                        { name: "Main Version", path: "../Games/Top-Down%20Survival%20Game/index.html" }
                     ]
                 },
                 {
@@ -181,7 +181,7 @@ class GameManager {
                     status: "Early Concept",
                     category: "games",
                     versions: [
-                        { name: "Main Version", path: "Games/Orb Royale/index.html" }
+                        { name: "Main Version", path: "../Games/Orb Royale/index.html" }
                     ]
                 }
             ],
@@ -194,7 +194,7 @@ class GameManager {
                     status: "Complete",
                     category: "tools",
                     versions: [
-                        { name: "Main Version", path: "Tools/Password%20Analyzer/password-analyzer.html" }
+                        { name: "Main Version", path: "../Tools/Password%20Analyzer/password-analyzer.html" }
                     ]
                 },
                 {
@@ -205,16 +205,16 @@ class GameManager {
                     status: "In Progress",
                     category: "tools",
                     versions: [
-                        { name: "Default", path: "Tools/Task%20Board/index.html" },
-                        { name: "Cyberpunk", path: "Tools/Task%20Board/cyberpunk.html" },
-                        { name: "Doom Metal", path: "Tools/Task%20Board/doom-metal.html" },
-                        { name: "Doom Reimagined", path: "Tools/Task%20Board/doom-reimagined.html" },
-                        { name: "Impressionist", path: "Tools/Task%20Board/impressionist.html" },
-                        { name: "Kawaii", path: "Tools/Task%20Board/kawaii.html" },
-                        { name: "Minimalist", path: "Tools/Task%20Board/minimalist.html" },
-                        { name: "Neopets", path: "Tools/Task%20Board/neopets.html" },
-                        { name: "Rainbow", path: "Tools/Task%20Board/rainbow.html" },
-                        { name: "Surrealist", path: "Tools/Task%20Board/surrealist.html" }
+                        { name: "Default", path: "../Tools/Task%20Board/index.html" },
+                        { name: "Cyberpunk", path: "../Tools/Task%20Board/cyberpunk.html" },
+                        { name: "Doom Metal", path: "../Tools/Task%20Board/doom-metal.html" },
+                        { name: "Doom Reimagined", path: "../Tools/Task%20Board/doom-reimagined.html" },
+                        { name: "Impressionist", path: "../Tools/Task%20Board/impressionist.html" },
+                        { name: "Kawaii", path: "../Tools/Task%20Board/kawaii.html" },
+                        { name: "Minimalist", path: "../Tools/Task%20Board/minimalist.html" },
+                        { name: "Neopets", path: "../Tools/Task%20Board/neopets.html" },
+                        { name: "Rainbow", path: "../Tools/Task%20Board/rainbow.html" },
+                        { name: "Surrealist", path: "../Tools/Task%20Board/surrealist.html" }
                     ]
                 },
                 {
@@ -225,11 +225,11 @@ class GameManager {
                     status: "In Progress",
                     category: "tools",
                     versions: [
-                        { name: "Original Design", path: "tools/pantry tracker/pantry-tracker-a1.html" },
-                        { name: "Neon Cyberpunk", path: "tools/pantry tracker/pantry-tracker-neon-cyberpunk.html" },
-                        { name: "Nature Organic", path: "tools/pantry tracker/pantry-tracker-nature-organic.html" },
-                        { name: "Minimal Glass", path: "tools/pantry tracker/pantry-tracker-minimal-glass.html" },
-                        { name: "Vintage Kitchen", path: "tools/pantry tracker/pantry-tracker-vintage-kitchen.html" }
+                        { name: "Original Design", path: "../tools/pantry tracker/pantry-tracker-a1.html" },
+                        { name: "Neon Cyberpunk", path: "../tools/pantry tracker/pantry-tracker-neon-cyberpunk.html" },
+                        { name: "Nature Organic", path: "../tools/pantry tracker/pantry-tracker-nature-organic.html" },
+                        { name: "Minimal Glass", path: "../tools/pantry tracker/pantry-tracker-minimal-glass.html" },
+                        { name: "Vintage Kitchen", path: "../tools/pantry tracker/pantry-tracker-vintage-kitchen.html" }
                     ]
                 },
                 {
@@ -240,7 +240,7 @@ class GameManager {
                     status: "Early Concept",
                     category: "tools",
                     versions: [
-                        { name: "Minimalist Dark", path: "tools/notes/notes.html" }
+                        { name: "Minimalist Dark", path: "../tools/notes/notes.html" }
                     ]
                 }
             ],
@@ -593,11 +593,11 @@ class ThemeManager {
     constructor() {
         this.currentTheme = localStorage.getItem('selectedTheme') || 'default';
         this.themeUrls = {
-            'default': '',
-            'minimalist': 'alternative home pages/minimalist-clean.html',
-            'cyberpunk': 'alternative home pages/cyberpunk-neon.html',
-            'nature': 'alternative home pages/nature-organic.html',
-            'vintage': 'alternative home pages/vintage-retro.html'
+            'default': '../index.html',
+            'minimalist': 'minimalist-clean.html',
+            'cyberpunk': 'cyberpunk-neon.html',
+            'nature': 'nature-organic.html',
+            'vintage': 'vintage-retro.html'
         };
         this.init();
     }
@@ -664,18 +664,10 @@ class ThemeManager {
     }
     
     switchTheme(theme) {
-        if (theme === 'default') {
-            // Stay on current page (default theme)
-            this.currentTheme = 'default';
-            localStorage.setItem('selectedTheme', 'default');
-            this.setActiveTheme();
-        } else {
-            // Navigate to alternative theme
-            const themeUrl = this.themeUrls[theme];
-            if (themeUrl) {
-                localStorage.setItem('selectedTheme', theme);
-                window.location.href = themeUrl;
-            }
+        const themeUrl = this.themeUrls[theme];
+        if (themeUrl) {
+            localStorage.setItem('selectedTheme', theme);
+            window.location.href = themeUrl;
         }
     }
 }
